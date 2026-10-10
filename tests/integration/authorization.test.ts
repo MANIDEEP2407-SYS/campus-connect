@@ -246,47 +246,4 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
     });
   });
 
-  describe("Lost & Found", () => {
-    it("redacts long numbers and forces sensitive handling server-side", async () => {
-      const { data, error } = await clients.vikram!.from("lost_found_items").insert({
-        owner_id: ids.vikram!, kind: "found", category: "id_card", title: "ID card test", description: "Card number 2023 4567 8901 found near AB1", location_label: "Academic Block I", occurred_on: new Date().toISOString().slice(0, 10), contact_pref: "in_app",
-      }).select("description, is_sensitive, contact_pref").single();
-      expect(error).toBeNull();
-      expect(data!.description).not.toMatch(/4567/);
-      expect(data).toMatchObject({ is_sensitive: true, contact_pref: "security_office" });
-    });
-
-    it("verification secrets are private to the poster", async () => {
-      const { data: item } = await clients.rahul!.from("lost_found_items").select("id").eq("title", "Blue water bottle with stickers").single();
-      const [{ data: own }, { data: other }] = await Promise.all([
-        clients.rahul!.from("lost_found_secrets").select("details").eq("item_id", item!.id),
-        clients.aditi!.from("lost_found_secrets").select("details").eq("item_id", item!.id),
-      ]);
-      expect(own).toHaveLength(1);
-      expect(other).toHaveLength(0);
-    });
-
-    it("full claim workflow: claim → private review → handover → returned", async () => {
-      const { data: found } = await clients.aditi!.from("lost_found_items").select("id").eq("title", "Blue water bottle with stickers").single();
-      const { data: lost } = await clients.aditi!.from("lost_found_items").select("id").eq("title", "Blue steel water bottle with planet stickers").single();
-      const claim = await clients.aditi!.rpc("lf_submit_claim", { p_item: found!.id, p_details: "It has a dent near the base and a NASA sticker on the cap.", p_lost_item: lost!.id });
-      expect(claim.error).toBeNull();
-      // Third parties can't see the claim or its details.
-      const { data: snoop } = await clients.fatima!.from("lost_found_claims").select("details").eq("item_id", found!.id);
-      expect(snoop).toHaveLength(0);
-      // The claimant can't approve their own claim.
-      expect((await clients.aditi!.rpc("lf_review_claim", { p_claim: claim.data as string, p_approve: true })).error).not.toBeNull();
-      // The finder reviews and approves, then confirms handover.
-      expect((await clients.rahul!.rpc("lf_review_claim", { p_claim: claim.data as string, p_approve: true, p_note: "Matches my notes" })).error).toBeNull();
-      expect((await clients.rahul!.rpc("lf_complete_handover", { p_claim: claim.data as string })).error).toBeNull();
-      const { data: after } = await clients.aditi!.from("lost_found_items").select("id, status").in("id", [found!.id, lost!.id]);
-      expect(after!.every((i) => i.status === "returned")).toBe(true);
-    });
-
-    it("owners cannot set claim-only statuses directly", async () => {
-      const { data: item } = await clients.sneha!.from("lost_found_items").select("id").eq("title", "Set of keys with red keychain").single();
-      const { error } = await clients.sneha!.from("lost_found_items").update({ status: "returned" }).eq("id", item!.id);
-      expect(error?.message).toMatch(/claim workflow/i);
-    });
-  });
 });

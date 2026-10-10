@@ -40,8 +40,8 @@ export async function resolveModerationReport(input: unknown) {
 export async function runMaintenance(input: unknown) {
   return withViewer(z.object({}), input, async (v) => {
     if (!v.isModerator && !v.isResponder) return fromPg({ message: "Not allowed", code: "P0001" });
-    const [lf, pulse] = await Promise.all([v.supabase.rpc("lf_expire_stale"), v.supabase.rpc("pulse_expire_stale")]);
+    const pulse = await v.supabase.rpc("pulse_expire_stale");
     refresh();
-    return ok(null, `Expired ${lf.data ?? 0} listings and ${pulse.data ?? 0} stale warnings`);
+    return ok(null, `Expired ${pulse.data ?? 0} stale warnings`);
   });
 }

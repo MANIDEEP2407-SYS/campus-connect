@@ -1,6 +1,6 @@
 import {
   BookOpen, CalendarDays, ClipboardList, Compass, FlaskConical, House, MessageCircle,
-  MessagesSquare, PackageSearch, ShieldAlert, ShieldCheck, Siren, User,
+  MessagesSquare, ShieldAlert, ShieldCheck, Siren, User,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -10,7 +10,6 @@ export const NAV_ITEMS = [
   { href: "/clubs", label: "Clubs & Events", icon: CalendarDays, also: ["/events"] },
   { href: "/research", label: "Research", icon: FlaskConical },
   { href: "/pulse", label: "CampusPulse", icon: Siren },
-  { href: "/lost-found", label: "Lost & Found", icon: PackageSearch },
   { href: "/resources", label: "Academic Resources", icon: BookOpen },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/profile", label: "Profile", icon: User },
@@ -23,7 +22,7 @@ export const STAFF_ITEMS = {
 } as const;
 
 /** Bottom bar on mobile: the five most-used destinations. */
-export const MOBILE_PRIMARY = ["/home", "/communities", "/pulse", "/lost-found", "/messages"] as const;
+export const MOBILE_PRIMARY = ["/home", "/communities", "/clubs", "/pulse", "/messages"] as const;
 
 export function isActive(pathname: string, href: string, also: readonly string[] = []) {
   if (href === "/pulse" && pathname.startsWith("/pulse/responder")) return false;

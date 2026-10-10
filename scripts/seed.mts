@@ -5,6 +5,9 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+// Generic stock photos under the Unsplash License (see src/lib/photos.ts) — not real clubs or people.
+const photo = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=70`;
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const password = process.env.DEMO_PASSWORD;
@@ -123,19 +126,19 @@ async function main() {
   await must(db.from("follows").insert(follows.map(([a, b]) => ({ follower_id: id[a], followee_id: id[b] }))), "follows");
 
   const clubsSeed = [
-    { slug: "circuit-breakers", name: "Circuit Breakers Robotics Society", tagline: "Build, break, iterate — robots for every year.", category: "Technical", logo: "🤖", is_official: true, membership_policy: "approval", creator: "sneha" },
-    { slug: "byte-brigade", name: "Byte Brigade Coding Club", tagline: "Competitive programming, open source and hack nights.", category: "Technical", logo: "💻", is_official: true, membership_policy: "open", creator: "aditi" },
-    { slug: "natya-collective", name: "Natya Kala Dance Collective", tagline: "Classical and contemporary dance on campus.", category: "Cultural", logo: "💃", is_official: true, membership_policy: "approval", creator: "divya" },
-    { slug: "green-campus", name: "Green Campus Initiative", tagline: "Student-led sustainability projects.", category: "Social service", logo: "🌱", is_official: false, membership_policy: "open", creator: "vikram" },
-    { slug: "lens-and-light", name: "Lens & Light Photography", tagline: "Photo walks, editing workshops and exhibitions.", category: "Arts", logo: "📷", is_official: false, membership_policy: "open", creator: "divya" },
-    { slug: "launchpad-circle", name: "LaunchPad Entrepreneurship Circle", tagline: "From idea to pitch — weekly founder meetups.", category: "Entrepreneurship", logo: "🚀", is_official: false, membership_policy: "approval", creator: "divya" },
+    { slug: "circuit-breakers", name: "Circuit Breakers Robotics Society", tagline: "Build, break, iterate — robots for every year.", category: "Technical", logo: "🤖", is_official: true, membership_policy: "approval", cover: "1532186773960-85649e5cb70b", creator: "sneha" },
+    { slug: "byte-brigade", name: "Byte Brigade Coding Club", tagline: "Competitive programming, open source and hack nights.", category: "Technical", logo: "💻", is_official: true, membership_policy: "open", cover: "1555066931-78c471f0d4ea", creator: "aditi" },
+    { slug: "natya-collective", name: "Natya Kala Dance Collective", tagline: "Classical and contemporary dance on campus.", category: "Cultural", logo: "💃", is_official: true, membership_policy: "approval", cover: "1463592177119-bab2a00f3ccb", creator: "divya" },
+    { slug: "green-campus", name: "Green Campus Initiative", tagline: "Student-led sustainability projects.", category: "Social service", logo: "🌱", is_official: false, membership_policy: "open", cover: "1551855350-c86caeaf8707", creator: "vikram" },
+    { slug: "lens-and-light", name: "Lens & Light Photography", tagline: "Photo walks, editing workshops and exhibitions.", category: "Arts", logo: "📷", is_official: false, membership_policy: "open", cover: "1502920917128-1aa500764cbd", creator: "divya" },
+    { slug: "launchpad-circle", name: "LaunchPad Entrepreneurship Circle", tagline: "From idea to pitch — weekly founder meetups.", category: "Entrepreneurship", logo: "🚀", is_official: false, membership_policy: "approval", cover: "1556761175-5973dc0f32e7", creator: "divya" },
   ] as const;
   const club: Record<string, string> = {};
   for (const c of clubsSeed) {
     const row = await must(
       db.from("clubs").insert({
         slug: c.slug, name: c.name, tagline: c.tagline, category: c.category, logo: c.logo, is_official: c.is_official,
-        membership_policy: c.membership_policy, created_by: id[c.creator],
+        membership_policy: c.membership_policy, created_by: id[c.creator], cover_url: photo(c.cover),
         description: `${c.tagline}\n\nThis is a fictional demo club created for the CampusConnect prototype. It does not represent a real Amrita organisation.`,
         requirements: c.membership_policy === "approval" ? "Open to all years. Coordinators review requests weekly." : "Anyone can join.",
       }).select("id").single(),
@@ -181,16 +184,16 @@ async function main() {
 
   console.log("Communities & messages…");
   const servers = [
-    { key: "ai", name: "AI & ML Collective", description: "Paper reading, Kaggle teams and project help across departments.", icon: "🧠", category: "Technical", visibility: "public", owner: "aditi", channels: ["papers", "projects"], members: ["rahul", "karthik", "fatima", "anand", "divya"] },
-    { key: "robo", name: "Robotics Builders", description: "Hardware, firmware and late-night lab sessions.", icon: "🤖", category: "Technical", visibility: "public", owner: "sneha", channels: ["hardware", "ros-help"], members: ["arjun", "rahul", "nikhil"] },
-    { key: "health", name: "Healthcare Innovation Lab", description: "Private space for the cross-disciplinary health-tech project team.", icon: "🧬", category: "Research", visibility: "private", owner: "priya", channels: ["datasets", "device-design"], members: ["aditi", "rahul", "anand"] },
-    { key: "cv", name: "Elective: Computer Vision (sample)", description: "Study group for students taking a computer vision elective. Sample community for the demo.", icon: "👁️", category: "Elective", visibility: "public", owner: "anand", channels: ["assignments", "doubts"], members: ["aditi", "karthik"] },
-    { key: "photo", name: "Campus Photography", description: "Share shots, plan photo walks, swap editing tips.", icon: "📷", category: "Hobby", visibility: "public", owner: "divya", channels: ["showcase"], members: ["sneha", "vikram"] },
+    { key: "ai", name: "AI & ML Collective", description: "Paper reading, Kaggle teams and project help across departments.", icon: "🧠", cover: "1677442135703-1787eea5ce01", category: "Technical", visibility: "public", owner: "aditi", channels: ["papers", "projects"], members: ["rahul", "karthik", "fatima", "anand", "divya"] },
+    { key: "robo", name: "Robotics Builders", description: "Hardware, firmware and late-night lab sessions.", icon: "🤖", cover: "1562758778-e5638b5b6607", category: "Technical", visibility: "public", owner: "sneha", channels: ["hardware", "ros-help"], members: ["arjun", "rahul", "nikhil"] },
+    { key: "health", name: "Healthcare Innovation Lab", description: "Private space for the cross-disciplinary health-tech project team.", icon: "🧬", cover: "1576670262660-05cf76d53da3", category: "Research", visibility: "private", owner: "priya", channels: ["datasets", "device-design"], members: ["aditi", "rahul", "anand"] },
+    { key: "cv", name: "Elective: Computer Vision (sample)", description: "Study group for students taking a computer vision elective. Sample community for the demo.", icon: "👁️", cover: "1501621667575-af81f1f0bacc", category: "Elective", visibility: "public", owner: "anand", channels: ["assignments", "doubts"], members: ["aditi", "karthik"] },
+    { key: "photo", name: "Campus Photography", description: "Share shots, plan photo walks, swap editing tips.", icon: "📷", cover: "1452587925148-ce544e77e70d", category: "Hobby", visibility: "public", owner: "divya", channels: ["showcase"], members: ["sneha", "vikram"] },
   ] as const;
   const server: Record<string, string> = {};
   const channel: Record<string, string> = {};
   for (const s of servers) {
-    const row = await must(db.from("servers").insert({ name: s.name, description: s.description, icon: s.icon, category: s.category, visibility: s.visibility, owner_id: id[s.owner] }).select("id").single(), `server ${s.key}`);
+    const row = await must(db.from("servers").insert({ name: s.name, description: s.description, icon: s.icon, category: s.category, visibility: s.visibility, owner_id: id[s.owner], cover_url: photo(s.cover) }).select("id").single(), `server ${s.key}`);
     server[s.key] = row.id;
     const general = await must(db.from("channels").select("id").eq("server_id", row.id).eq("name", "general").single(), "general");
     channel[`${s.key}:general`] = general.id;
@@ -230,15 +233,15 @@ async function main() {
 
   console.log("Events…");
   const events = [
-    { club: "circuit-breakers", org: "arjun", title: "Intro to Robotics Workshop (demo)", category: "Workshop", venue: "Academic Block II", s: at(days(2), 14), e: at(days(2), 17), cap: 40, dl: at(days(2), 10), desc: "Hands-on session: motors, sensors and your first line follower. Fictional demo event." },
-    { club: "byte-brigade", org: "aditi", title: "Hack Night #4 (demo)", category: "Hackathon", venue: "Central Library", s: at(days(9), 18), e: at(days(10), 18), cap: 100, dl: at(days(8), 23), desc: "24-hour build sprint with mentors. Fictional demo event." },
-    { club: "natya-collective", org: "divya", title: "Evening Dance Showcase (demo)", category: "Cultural", venue: "Auditorium", s: at(days(5), 18), e: at(days(5), 20), cap: null, dl: null, desc: "Classical and contemporary performances. Fictional demo event." },
-    { club: "green-campus", org: "vikram", title: "Campus Clean-up Drive (demo)", category: "General", venue: "Main Gate", s: at(days(1), 7), e: at(days(1), 9), cap: 3, dl: at(days(1), 6), desc: "Gloves and bags provided. Small group — limited places. Fictional demo event." },
-    { club: "lens-and-light", org: "divya", title: "Photo Walk: Campus Gardens (demo)", category: "Meetup", venue: "Library Walkway", s: at(days(-3), 6), e: at(days(-3), 8), cap: 25, dl: null, desc: "Past demo event." },
+    { club: "circuit-breakers", org: "arjun", title: "Intro to Robotics Workshop (demo)", cover: "1581092333322-31d2fd38a35e", category: "Workshop", venue: "Academic Block II", s: at(days(2), 14), e: at(days(2), 17), cap: 40, dl: at(days(2), 10), desc: "Hands-on session: motors, sensors and your first line follower. Fictional demo event." },
+    { club: "byte-brigade", org: "aditi", title: "Hack Night #4 (demo)", cover: "1631350397792-8e0c2de5b637", category: "Hackathon", venue: "Central Library", s: at(days(9), 18), e: at(days(10), 18), cap: 100, dl: at(days(8), 23), desc: "24-hour build sprint with mentors. Fictional demo event." },
+    { club: "natya-collective", org: "divya", title: "Evening Dance Showcase (demo)", cover: "1756370256926-e48ca54c5efe", category: "Cultural", venue: "Auditorium", s: at(days(5), 18), e: at(days(5), 20), cap: null, dl: null, desc: "Classical and contemporary performances. Fictional demo event." },
+    { club: "green-campus", org: "vikram", title: "Campus Clean-up Drive (demo)", cover: "1758599668429-121d54188b9c", category: "General", venue: "Main Gate", s: at(days(1), 7), e: at(days(1), 9), cap: 3, dl: at(days(1), 6), desc: "Gloves and bags provided. Small group — limited places. Fictional demo event." },
+    { club: "lens-and-light", org: "divya", title: "Photo Walk: Campus Gardens (demo)", cover: "1760817075083-a2b82e9d0676", category: "Meetup", venue: "Library Walkway", s: at(days(-3), 6), e: at(days(-3), 8), cap: 25, dl: null, desc: "Past demo event." },
   ];
   const eventIds: string[] = [];
   for (const e of events) {
-    const row = await must(db.from("events").insert({ club_id: club[e.club], organizer_id: id[e.org], title: e.title, description: e.desc, category: e.category, venue: e.venue, starts_at: e.s, ends_at: e.e, capacity: e.cap, registration_deadline: e.dl }).select("id").single(), `event ${e.title}`);
+    const row = await must(db.from("events").insert({ club_id: club[e.club], organizer_id: id[e.org], title: e.title, description: e.desc, category: e.category, venue: e.venue, starts_at: e.s, ends_at: e.e, capacity: e.cap, registration_deadline: e.dl, cover_url: photo(e.cover) }).select("id").single(), `event ${e.title}`);
     eventIds.push(row.id);
   }
   await must(db.from("event_registrations").insert([
@@ -317,25 +320,8 @@ async function main() {
   await must(db.from("report_updates").insert({ report_id: reportIds[1], actor_id: id.maintenance, kind: "note", note: "Pump motor tripped; electrician on the way.", is_internal: true }), "internal note");
   await must(db.from("report_confirmations").insert([{ report_id: reportIds[1], user_id: id.nikhil }, { report_id: reportIds[1], user_id: id.arjun }]), "confirmations");
 
-  console.log("Lost & Found demo listings (fictional)…");
-  const lf = [
-    { by: "aditi", kind: "lost", category: "other", title: "Blue steel water bottle with planet stickers", desc: "Lost my blue steel water bottle with planet stickers, probably on the second floor reading area. (Fictional demo listing)", loc: "Central Library", d: -1, secret: "There is a small dent near the base and a NASA sticker on the cap." },
-    { by: "rahul", kind: "found", category: "other", title: "Blue water bottle with stickers", desc: "Found a blue steel bottle with space stickers left on a reading table. (Fictional demo listing)", loc: "Central Library", d: 0, secret: "Dent near the base; sticker on the cap." },
-    { by: "vikram", kind: "found", category: "id_card", title: "Student ID card found at the canteen", desc: "Found a student ID card near the billing counter. Handed to the campus security office. (Fictional demo listing)", loc: "Main Canteen", d: 0, secret: "Name starts with 'S'; card has a green lanyard." },
-    { by: "arjun", kind: "lost", category: "bag", title: "Black backpack with laptop sleeve", desc: "Black backpack with a grey laptop sleeve and a carabiner on the strap. (Fictional demo listing)", loc: "Academic Block I", d: -2, secret: "Inside pocket has a Circuit Breakers keychain." },
-    { by: "sneha", kind: "found", category: "keys", title: "Set of keys with red keychain", desc: "Three keys on a red keychain found on the steps. (Fictional demo listing)", loc: "Academic Block I", d: -1, secret: "One key is a small padlock key with a blue cover." },
-    { by: "fatima", kind: "lost", category: "electronics", title: "Scientific calculator", desc: "Lost a grey scientific calculator in a black cover after an exam. (Fictional demo listing)", loc: "Academic Block III", d: -3, secret: "Initials scratched on the back of the cover." },
-  ] as const;
-  const lfIds: string[] = [];
-  for (const i of lf) {
-    const row = await must(db.from("lost_found_items").insert({ owner_id: id[i.by], kind: i.kind, category: i.category, title: i.title, description: i.desc, location_label: i.loc, occurred_on: dateOnly(days(i.d)), contact_pref: "in_app", is_demo: true }).select("id").single(), `lf ${i.title}`);
-    lfIds.push(row.id);
-    await must(db.from("lost_found_secrets").insert({ item_id: row.id, details: i.secret }), "lf secret");
-  }
-
   console.log("Notifications…");
   await must(db.from("notifications").insert([
-    // (Lost & Found match notifications are generated by the lf_notify_matches trigger.)
     { user_id: id.aditi, type: "research.application", title: "Your application to Quality control for chest X-ray datasets was received", link: `/research/${projectIds[0]}` },
     { user_id: id.priya, type: "server.request", title: "Sneha Pillai requested to join Healthcare Innovation Lab", link: `/communities/${server.health}/settings` },
     { user_id: id.security, type: "pulse.new", title: "New high report: Snake seen near library walkway (demo)", body: "Library Walkway", link: `/pulse/${reportIds[0]}` },

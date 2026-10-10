@@ -16,8 +16,7 @@ const GROUP: Record<string, string> = {
   dm: "Messages", follow: "Social", like: "Social", comment: "Social", "server.join": "Communities", "server.request": "Communities", "server.request.decided": "Communities",
   "club.request": "Clubs", "club.decided": "Clubs", "event.registered": "Events", "event.reminder": "Events", "event.updated": "Events",
   "research.application": "Research", "research.status": "Research", "pulse.new": "CampusPulse", "pulse.status": "CampusPulse", "pulse.assigned": "CampusPulse",
-  "pulse.alert": "Safety alert", "lf.match": "Lost & Found", "lf.claim": "Lost & Found", "lf.claim.decided": "Lost & Found", "lf.returned": "Lost & Found",
-  "lf.dispute": "Moderation", "lf.moderated": "Lost & Found", moderation: "Moderation", role: "Account",
+  "pulse.alert": "Safety alert", moderation: "Moderation", role: "Account",
 };
 
 export default async function NotificationsPage({ searchParams }: PageProps<"/notifications">) {

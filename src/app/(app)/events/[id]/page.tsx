@@ -5,6 +5,7 @@ import { BadgeCheck, CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { ToneBadge } from "@/components/common/tone-badge";
+import { CoverImage } from "@/components/common/cover-image";
 import { UserAvatar } from "@/components/common/user-avatar";
 import { ActionButton } from "@/components/common/action-button";
 import { formatDateTime } from "@/components/common/time-ago";
@@ -18,7 +19,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
   const v = await requireViewer();
   const { data: e } = await v.supabase
     .from("events")
-    .select("*, club:clubs(id, name, slug, is_official, logo), organizer:profiles!events_organizer_id_fkey(handle, full_name)")
+    .select("*, club:clubs(id, name, slug, is_official, logo, cover_url), organizer:profiles!events_organizer_id_fkey(handle, full_name)")
     .eq("id", id)
     .maybeSingle();
   if (!e) notFound();
@@ -41,6 +42,9 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
 
   return (
     <div className="max-w-4xl">
+      {(e.cover_url ?? e.club?.cover_url) && (
+        <CoverImage src={e.cover_url ?? e.club?.cover_url} width={1400} priority className={`mb-6 h-44 w-full rounded-xl md:h-64${e.is_cancelled ? " grayscale" : ""}`} />
+      )}
       <PageHeader
         back={{ href: "/events", label: "All events" }}
         eyebrow={
@@ -60,7 +64,7 @@ export default async function EventPage({ params }: PageProps<"/events/[id]">) {
             <>
               <EventFormDialog
                 clubId={e.club_id ?? undefined}
-                existing={{ id: e.id, title: e.title, description: e.description ?? "", category: e.category, venue: e.venue, starts_at: e.starts_at, ends_at: e.ends_at, capacity: e.capacity ?? "", registration_deadline: e.registration_deadline ?? "", club_id: e.club_id }}
+                existing={{ id: e.id, title: e.title, description: e.description ?? "", category: e.category, venue: e.venue, starts_at: e.starts_at, ends_at: e.ends_at, capacity: e.capacity ?? "", registration_deadline: e.registration_deadline ?? "", club_id: e.club_id, cover_url: e.cover_url ?? "" }}
               />
               <ActionButton action={cancelEvent} input={{ eventId: e.id }} variant="destructive" size="sm"
                 confirm={{ title: "Cancel this event?", description: "All registrants will be notified. This cannot be undone.", confirmLabel: "Cancel event", destructive: true }}>

@@ -1,7 +1,7 @@
 # CampusConnect Amrita
 
 **One Campus. Every Connection. Every Opportunity.**
-A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vidyapeetham, Coimbatore — communities with realtime chat, social feed, people discovery, clubs & events, research & consultancy, academic resources, **CampusPulse** issue reporting, **Lost & Found**, **Amrita Microsoft 365 sign-in** and **CampusShield** AI-assisted moderation.
+A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vidyapeetham, Coimbatore — communities with realtime chat, social feed, people discovery, clubs & events, research & consultancy, academic resources, **CampusPulse** issue reporting, **Amrita Microsoft 365 sign-in** and **CampusShield** AI-assisted moderation.
 
 **Live demo:** https://campus-connect-nu-nine.vercel.app
 
@@ -51,7 +51,7 @@ All on `@demo.campusconnect.test`, password = `DEMO_PASSWORD` from `.env.local` 
 | `karthik` | Doctoral scholar (can publish research) |
 | `anand`, `priya` | Verified faculty |
 | `security`, `maintenance` | CampusPulse safety responders |
-| `moderator` | Safety moderator (CampusShield, Lost & Found) |
+| `moderator` | Safety moderator (CampusShield) |
 | `admin` | Platform admin (roles, verification, audit log) |
 
 ### Scripts
@@ -73,11 +73,10 @@ All on `@demo.campusconnect.test`, password = `DEMO_PASSWORD` from `.env.local` 
 - **Discover** — server-side search and transparent, rules-based recommendations.
 - **Communities** — public/private servers, invites, join requests, channels, roles, realtime messages with typing indicators, replies, edits and moderation.
 - **Direct messages** — private realtime conversations.
-- **Clubs & events** — official vs student clubs, membership approval, events with capacity-safe registration, reminders.
+- **Clubs & events** — official vs student clubs, membership approval, events with capacity-safe registration, reminders, cover photos.
 - **Research & consultancy** — listings, applications and decisions; restricted budget details.
 - **Academic resources** — official vs student-contributed material and course communities.
 - **CampusPulse** — issue and safety reports with map, duplicate detection, responder desk, enforced status lifecycle, campus alerts; reporters stay anonymous publicly.
-- **Lost & Found** — suggested matches, private verification details, claim → review → handover, sensitive-item handling, moderation.
 - **CampusShield** — AI-assisted moderation queue for posts, comments and community messages (see below).
 
 ## Microsoft sign-in (Amrita Microsoft 365)
@@ -121,6 +120,10 @@ Setup:
 - University approval for Microsoft sign-in (app registration, tenant, consent).
 - Institutional approval for sending post text to the moderation provider, the retention policy, and the moderation/appeals process.
 - Disable email/password sign-in in production.
+
+## Photos
+
+The landing page and demo clubs, events and communities use generic stock photos from [Unsplash](https://unsplash.com) (Unsplash License: free to use, credits listed in `src/lib/photos.ts`). They are illustrative only — not photos of real Amrita clubs, events or people. Club coordinators, event organisers and community owners can upload their own cover photos; covers are limited to the app's public upload bucket and Unsplash.
 
 ## Known limitations
 

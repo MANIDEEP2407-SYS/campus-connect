@@ -8,7 +8,6 @@ import { ToneBadge } from "@/components/common/tone-badge";
 import { TimeAgo } from "@/components/common/time-ago";
 import { ActionButton } from "@/components/common/action-button";
 import { ModerationActions } from "@/components/admin/moderation-actions";
-import { moderateLfItem, reviewClaim } from "@/lib/actions/lostfound";
 import { runMaintenance } from "@/lib/actions/admin";
 import { setClubOfficial } from "@/lib/actions/clubs";
 import { ROLE_LABELS } from "@/lib/constants";
@@ -16,14 +15,13 @@ import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Admin & moderation" };
 
-const TABS = { moderation: "Flagged content", lostfound: "Lost & Found", clubs: "Club verification", roles: "Roles", audit: "Audit log" } as const;
+const TABS = { moderation: "Flagged content", clubs: "Club verification", roles: "Roles", audit: "Audit log" } as const;
 type Tab = keyof typeof TABS;
 
 function targetHref(type: string, id: string) {
   switch (type) {
     case "post": return `/home#post-${id}`;
     case "server": return `/communities/${id}`;
-    case "lf_item": return `/lost-found/${id}`;
     case "pulse_report": return `/pulse/${id}`;
     case "resource": return "/resources";
     default: return null;
@@ -34,12 +32,12 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const v = await requireViewer();
   if (!v.isModerator) redirect("/home");
   const sp = await searchParams;
-  const allowed: Tab[] = v.isAdmin ? ["moderation", "lostfound", "clubs", "roles", "audit"] : ["moderation", "lostfound"];
+  const allowed: Tab[] = v.isAdmin ? ["moderation", "clubs", "roles", "audit"] : ["moderation"];
   const tab = (typeof sp.tab === "string" && (allowed as string[]).includes(sp.tab) ? sp.tab : "moderation") as Tab;
 
   return (
     <div>
-      <PageHeader title="Admin & moderation" description="Review flagged content, Lost & Found disputes and verification requests. Every action here is recorded in the audit log."
+      <PageHeader title="Admin & moderation" description="Review flagged content and verification requests. Every action here is recorded in the audit log."
         actions={<ActionButton action={runMaintenance} input={{}} variant="outline" size="sm">Run expiry maintenance</ActionButton>} />
       <nav aria-label="Admin sections" className="mb-6 flex gap-1 overflow-x-auto rounded-lg border bg-card p-1">
         {allowed.map((t) => (
@@ -50,7 +48,6 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
         ))}
       </nav>
       {tab === "moderation" && <ModerationTab />}
-      {tab === "lostfound" && <LostFoundTab />}
       {tab === "clubs" && <ClubsTab />}
       {tab === "roles" && <RolesTab q={typeof sp.q === "string" ? sp.q : ""} />}
       {tab === "audit" && <AuditTab />}
@@ -80,13 +77,13 @@ async function ModerationTab() {
     ...(profiles ?? []).map((p) => [p.id, { text: `${p.full_name} (@${p.handle})`, href: `/profile/${p.handle}` }] as const),
   ]);
 
-  if (!reports?.length) return <EmptyState title="No open reports" description="Flagged posts, messages, listings and profiles appear here." />;
+  if (!reports?.length) return <EmptyState title="No open reports" description="Flagged posts, messages, communities and profiles appear here." />;
   return (
     <ul className="space-y-3">
       {reports.map((r) => {
         const pv = preview.get(r.target_id);
         const href = pv?.href ?? targetHref(r.target_type, r.target_id);
-        const removable = ["post", "comment", "message", "lf_item", "resource", "server"].includes(r.target_type);
+        const removable = ["post", "comment", "message", "resource", "server"].includes(r.target_type);
         return (
           <li key={r.id} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -101,67 +98,6 @@ async function ModerationTab() {
         );
       })}
     </ul>
-  );
-}
-
-async function LostFoundTab() {
-  const v = await requireViewer();
-  const [{ data: flagged }, { data: disputes }, { data: expired }] = await Promise.all([
-    v.supabase.from("lost_found_items").select("id, title, kind, status, created_at").eq("flagged", true).neq("status", "removed").order("created_at", { ascending: false }),
-    v.supabase.from("lost_found_claims").select("id, details, dispute_reason, created_at, item:lost_found_items!lost_found_claims_item_id_fkey(id, title), claimant:profiles!lost_found_claims_claimant_id_fkey(full_name)").eq("status", "disputed"),
-    v.supabase.from("lost_found_items").select("id, title, kind, expires_at").eq("status", "open").lt("expires_at", new Date().toISOString()).limit(50),
-  ]);
-  return (
-    <div className="space-y-6">
-      <section>
-        <h2 className="mb-3 font-semibold">Claim disputes ({disputes?.length ?? 0})</h2>
-        {!disputes?.length ? <p className="text-sm text-muted-foreground">No disputes.</p> : (
-          <ul className="space-y-3">
-            {disputes.map((d) => (
-              <li key={d.id} className="space-y-2 rounded-xl border bg-card p-4 text-sm">
-                <p><Link href={`/lost-found/${d.item?.id}`} className="font-medium hover:underline">{d.item?.title}</Link> <span className="text-xs text-muted-foreground">· claimant {d.claimant?.full_name} · <TimeAgo date={d.created_at} /></span></p>
-                <p className="text-muted-foreground"><span className="text-foreground">Claim:</span> {d.details}</p>
-                <p className="text-warning">Dispute: {d.dispute_reason}</p>
-                <div className="flex gap-2">
-                  <ActionButton action={reviewClaim} input={{ claimId: d.id, approve: true, note: "Approved by moderator after review" }} size="sm">Uphold claim</ActionButton>
-                  <ActionButton action={reviewClaim} input={{ claimId: d.id, approve: false, note: "Dispute reviewed by moderator: not approved" }} size="sm" variant="outline">Reject</ActionButton>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section>
-        <h2 className="mb-3 font-semibold">Flagged listings ({flagged?.length ?? 0})</h2>
-        {!flagged?.length ? <p className="text-sm text-muted-foreground">Nothing flagged.</p> : (
-          <ul className="divide-y rounded-xl border bg-card">
-            {flagged.map((i) => (
-              <li key={i.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
-                <Link href={`/lost-found/${i.id}`} className="font-medium hover:underline">{i.title}</Link>
-                <ToneBadge>{i.kind}</ToneBadge>
-                <div className="ml-auto flex gap-2">
-                  <ActionButton action={moderateLfItem} input={{ itemId: i.id, action: "clear_flag" }} size="sm" variant="outline">Clear flag</ActionButton>
-                  <ActionButton action={moderateLfItem} input={{ itemId: i.id, action: "remove", note: "Removed after review" }} size="sm" variant="destructive">Remove</ActionButton>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section>
-        <h2 className="mb-3 font-semibold">Past expiry ({expired?.length ?? 0})</h2>
-        {!expired?.length ? <p className="text-sm text-muted-foreground">No stale listings. Run expiry maintenance to sweep automatically.</p> : (
-          <ul className="divide-y rounded-xl border bg-card">
-            {expired.map((i) => (
-              <li key={i.id} className="flex items-center gap-3 px-4 py-3 text-sm">
-                <Link href={`/lost-found/${i.id}`} className="hover:underline">{i.title}</Link>
-                <ActionButton action={moderateLfItem} input={{ itemId: i.id, action: "expire" }} size="sm" variant="ghost" className="ml-auto">Mark expired</ActionButton>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
   );
 }
 

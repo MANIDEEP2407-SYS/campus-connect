@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FormField, fieldAria, selectClass } from "@/components/common/form-field";
+import { CoverField } from "@/components/common/cover-field";
 import { createClub, updateClub } from "@/lib/actions/clubs";
 import { clubSchema } from "@/lib/validation";
 import { CLUB_CATEGORIES } from "@/lib/constants";
@@ -26,7 +27,7 @@ export function ClubFormDialog({ existing }: { existing?: Values & { id: string 
   const [pending, start] = useTransition();
   const form = useForm<Values, unknown, z.output<typeof clubSchema>>({
     resolver: zodResolver(clubSchema),
-    defaultValues: existing ?? { name: "", slug: "", tagline: "", description: "", category: "Technical", logo: "✨", membership_policy: "approval", requirements: "" },
+    defaultValues: existing ?? { name: "", slug: "", tagline: "", description: "", category: "Technical", logo: "✨", membership_policy: "approval", requirements: "", cover_url: "" },
   });
   const { errors } = form.formState;
 
@@ -74,8 +75,8 @@ export function ClubFormDialog({ existing }: { existing?: Values & { id: string 
             <Textarea rows={4} {...fieldAria(fid("club-desc"))} {...form.register("description")} />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Category" htmlFor="club-cat2">
-              <select className={selectClass} {...fieldAria("club-cat2")} {...form.register("category")}>
+            <FormField label="Category" htmlFor={fid("club-cat2")}>
+              <select className={selectClass} {...fieldAria(fid("club-cat2"))} {...form.register("category")}>
                 {CLUB_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </FormField>
@@ -89,6 +90,7 @@ export function ClubFormDialog({ existing }: { existing?: Values & { id: string 
           <FormField label="Membership requirements" htmlFor={fid("club-req")} error={errors.requirements?.message}>
             <Textarea rows={2} maxLength={500} {...fieldAria(fid("club-req"))} {...form.register("requirements")} placeholder="e.g. Open to all years; attend one orientation session" />
           </FormField>
+          <CoverField value={form.watch("cover_url")} onChange={(url) => form.setValue("cover_url", url, { shouldDirty: true })} />
         </form>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

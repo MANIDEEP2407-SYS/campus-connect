@@ -5,6 +5,7 @@ import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { ToneBadge } from "@/components/common/tone-badge";
+import { CoverImage } from "@/components/common/cover-image";
 import { formatDateTime } from "@/components/common/time-ago";
 import { ClubTabs } from "@/components/clubs/club-tabs";
 import { EventFormDialog } from "@/components/clubs/event-form-dialog";
@@ -25,7 +26,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
   const now = new Date().toISOString();
   let q = v.supabase
     .from("events")
-    .select("id, title, category, venue, starts_at, ends_at, capacity, is_cancelled, registration_deadline, club:clubs(name, slug, is_official, logo)")
+    .select("id, title, category, venue, starts_at, ends_at, capacity, is_cancelled, registration_deadline, cover_url, club:clubs(name, slug, is_official, logo, cover_url)")
     .order("starts_at", { ascending: !past })
     .limit(60);
   q = past ? q.lt("ends_at", now) : q.gte("ends_at", now);
@@ -68,8 +69,12 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
             const d = new Date(e.starts_at);
             return (
               <li key={e.id}>
-                <Link href={`/events/${e.id}`} className="flex h-full gap-4 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
-                  <div className="flex w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-muted py-2 text-center">
+                <Link href={`/events/${e.id}`} className="group flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40">
+                  <div className="relative overflow-hidden">
+                    <CoverImage src={e.cover_url ?? e.club?.cover_url} emoji={e.club?.logo ?? "📅"} width={720} className={cn("h-36 w-full transition-transform duration-300 group-hover:scale-105", e.is_cancelled && "grayscale")} />
+                  </div>
+                  <div className="flex flex-1 gap-4 p-4">
+                  <div className="-mt-10 flex w-14 shrink-0 flex-col items-center justify-center self-start rounded-lg border bg-card py-2 text-center shadow-sm">
                     <span className="text-[11px] font-medium text-primary uppercase">{new Intl.DateTimeFormat("en-IN", { month: "short", timeZone: "Asia/Kolkata" }).format(d)}</span>
                     <span className="text-xl font-semibold tabular-nums">{new Intl.DateTimeFormat("en-IN", { day: "numeric", timeZone: "Asia/Kolkata" }).format(d)}</span>
                   </div>
@@ -87,6 +92,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
                       <Users className="size-3.5" /> {e.capacity ? `${taken}/${e.capacity} registered` : `${taken} registered`}
                       {full && !e.is_cancelled && <ToneBadge tone="danger" className="ml-1">Full</ToneBadge>}
                     </p>
+                  </div>
                   </div>
                 </Link>
               </li>

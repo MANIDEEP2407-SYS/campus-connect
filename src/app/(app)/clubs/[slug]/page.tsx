@@ -6,6 +6,7 @@ import { requireViewer } from "@/lib/auth";
 import { getFeed } from "@/lib/queries/feed";
 import { PageHeader } from "@/components/common/page-header";
 import { ToneBadge } from "@/components/common/tone-badge";
+import { CoverImage } from "@/components/common/cover-image";
 import { UserAvatar } from "@/components/common/user-avatar";
 import { ActionButton } from "@/components/common/action-button";
 import { TimeAgo, formatDateTime } from "@/components/common/time-ago";
@@ -30,7 +31,7 @@ export default async function ClubPage({ params }: PageProps<"/clubs/[slug]">) {
   const [{ data: members }, { data: myRow }, { data: events }, feed] = await Promise.all([
     v.supabase.from("club_members").select("user_id, role, status, note, created_at, profile:profiles!club_members_user_id_fkey(handle, full_name, avatar_url)").eq("club_id", club.id).order("created_at"),
     v.supabase.from("club_members").select("role, status").eq("club_id", club.id).eq("user_id", v.userId).maybeSingle(),
-    v.supabase.from("events").select("id, title, starts_at, venue, capacity, is_cancelled").eq("club_id", club.id).gte("ends_at", new Date().toISOString()).order("starts_at").limit(10),
+    v.supabase.from("events").select("id, title, starts_at, venue, capacity, is_cancelled, cover_url").eq("club_id", club.id).gte("ends_at", new Date().toISOString()).order("starts_at").limit(10),
     getFeed(v, { tab: "all", clubId: club.id, limit: 10 }),
   ]);
   const isCoordinator = (myRow?.role === "coordinator" && myRow.status === "approved") || v.isAdmin;
@@ -40,6 +41,7 @@ export default async function ClubPage({ params }: PageProps<"/clubs/[slug]">) {
 
   return (
     <div>
+      {club.cover_url && <CoverImage src={club.cover_url} width={1600} priority className="mb-6 h-40 w-full rounded-xl md:h-56" />}
       <PageHeader
         back={{ href: "/clubs", label: "All clubs" }}
         eyebrow={
@@ -57,7 +59,7 @@ export default async function ClubPage({ params }: PageProps<"/clubs/[slug]">) {
                 {club.is_official ? "Remove official status" : "Verify as official"}
               </ActionButton>
             )}
-            {isCoordinator && <ClubFormDialog existing={{ id: club.id, name: club.name, slug: club.slug, tagline: club.tagline ?? "", description: club.description ?? "", category: club.category, logo: club.logo, membership_policy: club.membership_policy, requirements: club.requirements ?? "" }} />}
+            {isCoordinator && <ClubFormDialog existing={{ id: club.id, name: club.name, slug: club.slug, tagline: club.tagline ?? "", description: club.description ?? "", category: club.category, logo: club.logo, membership_policy: club.membership_policy, requirements: club.requirements ?? "", cover_url: club.cover_url ?? "" }} />}
             {!myRow || myRow.status === "rejected" ? (
               <JoinClubButton clubId={club.id} policy={club.membership_policy} />
             ) : myRow.status === "pending" ? (
@@ -92,8 +94,9 @@ export default async function ClubPage({ params }: PageProps<"/clubs/[slug]">) {
               <ul className="space-y-2">
                 {events.map((e) => (
                   <li key={e.id}>
-                    <Link href={`/events/${e.id}`} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4 hover:border-primary/40">
-                      <div>
+                    <Link href={`/events/${e.id}`} className="flex items-center gap-3 rounded-xl border bg-card p-3 hover:border-primary/40">
+                      <CoverImage src={e.cover_url ?? club.cover_url} emoji={club.logo} width={240} className="size-16 shrink-0 rounded-lg text-2xl" />
+                      <div className="min-w-0 flex-1">
                         <p className="font-medium">{e.title}</p>
                         <p className="text-xs text-muted-foreground">{formatDateTime(e.starts_at)} · {e.venue}</p>
                       </div>

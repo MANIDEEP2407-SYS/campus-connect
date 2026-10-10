@@ -5,6 +5,7 @@ import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { ToneBadge } from "@/components/common/tone-badge";
+import { CoverImage } from "@/components/common/cover-image";
 import { selectClass } from "@/components/common/form-field";
 import { CreateServerDialog } from "@/components/communities/create-server-dialog";
 import { Button } from "@/components/ui/button";
@@ -18,13 +19,13 @@ export default async function CommunitiesPage({ searchParams }: PageProps<"/comm
   const category = typeof sp.category === "string" ? sp.category : "";
   const v = await requireViewer();
 
-  let query = v.supabase.from("servers").select("id, name, description, icon, category, visibility, server_members(count)").order("created_at", { ascending: false }).limit(60);
+  let query = v.supabase.from("servers").select("id, name, description, icon, cover_url, category, visibility, server_members(count)").order("created_at", { ascending: false }).limit(60);
   if (q) query = query.or(`name.ilike.%${q.replace(/[%,()]/g, "")}%,description.ilike.%${q.replace(/[%,()]/g, "")}%`);
   if (category) query = query.eq("category", category);
 
   const [{ data: servers }, { data: mine }, { data: pending }] = await Promise.all([
     query,
-    v.supabase.from("server_members").select("role, server:servers(id, name, icon, category, visibility)").eq("user_id", v.userId),
+    v.supabase.from("server_members").select("role, server:servers(id, name, icon, cover_url, category, visibility)").eq("user_id", v.userId),
     v.supabase.from("server_join_requests").select("server_id").eq("user_id", v.userId).eq("status", "pending"),
   ]);
   const memberOf = new Set((mine ?? []).map((m) => m.server?.id));
@@ -44,10 +45,12 @@ export default async function CommunitiesPage({ searchParams }: PageProps<"/comm
           <ul className="flex gap-3 overflow-x-auto pb-2">
             {mine!.filter((m) => m.server).map((m) => (
               <li key={m.server!.id} className="shrink-0">
-                <Link href={`/communities/${m.server!.id}`} className="flex w-44 flex-col items-start gap-2 rounded-xl border bg-card p-3 hover:border-primary/40">
-                  <span className="grid size-10 place-items-center rounded-lg bg-muted text-xl" aria-hidden>{m.server!.icon}</span>
-                  <span className="line-clamp-1 text-sm font-medium">{m.server!.name}</span>
-                  <span className="text-xs text-muted-foreground capitalize">{m.role}</span>
+                <Link href={`/communities/${m.server!.id}`} className="flex w-48 flex-col overflow-hidden rounded-xl border bg-card hover:border-primary/40">
+                  <CoverImage src={m.server!.cover_url} emoji={m.server!.icon} width={400} className="h-20 w-full text-2xl" />
+                  <span className="flex flex-col items-start gap-1 p-3">
+                    <span className="line-clamp-1 text-sm font-medium">{m.server!.icon} {m.server!.name}</span>
+                    <span className="text-xs text-muted-foreground capitalize">{m.role}</span>
+                  </span>
                 </Link>
               </li>
             ))}
@@ -75,10 +78,14 @@ export default async function CommunitiesPage({ searchParams }: PageProps<"/comm
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {servers.map((s) => (
             <li key={s.id}>
-              <Link href={`/communities/${s.id}`} className="flex h-full flex-col rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
+              <Link href={`/communities/${s.id}`} className="group flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40">
+                <div className="overflow-hidden">
+                  <CoverImage src={s.cover_url} emoji={s.icon} width={640} className="h-28 w-full transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div className="flex flex-1 flex-col p-4 pt-0">
                 <div className="flex items-start gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-2xl" aria-hidden>{s.icon}</span>
-                  <div className="min-w-0 flex-1">
+                  <span className="-mt-5 grid size-11 shrink-0 place-items-center rounded-xl border-2 border-card bg-muted text-2xl shadow-sm" aria-hidden>{s.icon}</span>
+                  <div className="min-w-0 flex-1 pt-2">
                     <p className="truncate font-medium">{s.name}</p>
                     <div className="mt-1 flex flex-wrap gap-1.5">
                       <ToneBadge>{s.category}</ToneBadge>
@@ -92,6 +99,7 @@ export default async function CommunitiesPage({ searchParams }: PageProps<"/comm
                     <Users className="size-3.5" /> {s.visibility === "private" && !memberOf.has(s.id) ? "Members only" : `${s.server_members[0]?.count ?? 0} members`}
                   </span>
                   {memberOf.has(s.id) ? <span className="text-primary">Joined</span> : pendingSet.has(s.id) ? <span>Request pending</span> : null}
+                </div>
                 </div>
               </Link>
             </li>

@@ -117,14 +117,14 @@ isOneToOne: false
                   ]
                 },"clubs": {
                   Row: {
-                    "category": string,"created_at": string,"created_by": string | null,"description": string | null,"id": string,"is_official": boolean,"logo": string,"membership_policy": Database["public"]['Enums']["membership_policy"],"name": string,"requirements": string | null,"server_id": string | null,"slug": string,"tagline": string | null
+                    "category": string,"cover_url": string | null,"created_at": string,"created_by": string | null,"description": string | null,"id": string,"is_official": boolean,"logo": string,"membership_policy": Database["public"]['Enums']["membership_policy"],"name": string,"requirements": string | null,"server_id": string | null,"slug": string,"tagline": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "category": string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"logo"?: string,"membership_policy"?: Database["public"]['Enums']["membership_policy"],"name": string,"requirements"?: string | null,"server_id"?: string | null,"slug": string,"tagline"?: string | null
+                    "category": string,"cover_url"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"logo"?: string,"membership_policy"?: Database["public"]['Enums']["membership_policy"],"name": string,"requirements"?: string | null,"server_id"?: string | null,"slug": string,"tagline"?: string | null
                   }
                   Update: {
-                    "category"?: string,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"logo"?: string,"membership_policy"?: Database["public"]['Enums']["membership_policy"],"name"?: string,"requirements"?: string | null,"server_id"?: string | null,"slug"?: string,"tagline"?: string | null
+                    "category"?: string,"cover_url"?: string | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"logo"?: string,"membership_policy"?: Database["public"]['Enums']["membership_policy"],"name"?: string,"requirements"?: string | null,"server_id"?: string | null,"slug"?: string,"tagline"?: string | null
                   }
                   Relationships: [
                     {
@@ -291,14 +291,14 @@ isOneToOne: false
                   ]
                 },"events": {
                   Row: {
-                    "capacity": number | null,"category": string,"club_id": string | null,"created_at": string,"description": string | null,"ends_at": string,"id": string,"is_cancelled": boolean,"organizer_id": string,"registration_deadline": string | null,"starts_at": string,"title": string,"venue": string
+                    "capacity": number | null,"category": string,"club_id": string | null,"cover_url": string | null,"created_at": string,"description": string | null,"ends_at": string,"id": string,"is_cancelled": boolean,"organizer_id": string,"registration_deadline": string | null,"starts_at": string,"title": string,"venue": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "capacity"?: number | null,"category"?: string,"club_id"?: string | null,"created_at"?: string,"description"?: string | null,"ends_at": string,"id"?: string,"is_cancelled"?: boolean,"organizer_id": string,"registration_deadline"?: string | null,"starts_at": string,"title": string,"venue": string
+                    "capacity"?: number | null,"category"?: string,"club_id"?: string | null,"cover_url"?: string | null,"created_at"?: string,"description"?: string | null,"ends_at": string,"id"?: string,"is_cancelled"?: boolean,"organizer_id": string,"registration_deadline"?: string | null,"starts_at": string,"title": string,"venue": string
                   }
                   Update: {
-                    "capacity"?: number | null,"category"?: string,"club_id"?: string | null,"created_at"?: string,"description"?: string | null,"ends_at"?: string,"id"?: string,"is_cancelled"?: boolean,"organizer_id"?: string,"registration_deadline"?: string | null,"starts_at"?: string,"title"?: string,"venue"?: string
+                    "capacity"?: number | null,"category"?: string,"club_id"?: string | null,"cover_url"?: string | null,"created_at"?: string,"description"?: string | null,"ends_at"?: string,"id"?: string,"is_cancelled"?: boolean,"organizer_id"?: string,"registration_deadline"?: string | null,"starts_at"?: string,"title"?: string,"venue"?: string
                   }
                   Relationships: [
                     {
@@ -356,102 +356,6 @@ isOneToOne: false
       columns: ["follower_id"]
 isOneToOne: false
       referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"lost_found_claims": {
-                  Row: {
-                    "claimant_id": string,"created_at": string,"details": string,"dispute_reason": string | null,"id": string,"item_id": string,"lost_item_id": string | null,"review_note": string | null,"reviewer_id": string | null,"status": Database["public"]['Enums']["lf_claim_status"],"updated_at": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "claimant_id": string,"created_at"?: string,"details": string,"dispute_reason"?: string | null,"id"?: string,"item_id": string,"lost_item_id"?: string | null,"review_note"?: string | null,"reviewer_id"?: string | null,"status"?: Database["public"]['Enums']["lf_claim_status"],"updated_at"?: string
-                  }
-                  Update: {
-                    "claimant_id"?: string,"created_at"?: string,"details"?: string,"dispute_reason"?: string | null,"id"?: string,"item_id"?: string,"lost_item_id"?: string | null,"review_note"?: string | null,"reviewer_id"?: string | null,"status"?: Database["public"]['Enums']["lf_claim_status"],"updated_at"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "lost_found_claims_claimant_id_fkey"
-      columns: ["claimant_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_claims_claimant_id_fkey"
-      columns: ["claimant_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_claims_item_id_fkey"
-      columns: ["item_id"]
-isOneToOne: false
-      referencedRelation: "lost_found_items"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_claims_lost_item_id_fkey"
-      columns: ["lost_item_id"]
-isOneToOne: false
-      referencedRelation: "lost_found_items"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_claims_reviewer_id_fkey"
-      columns: ["reviewer_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_claims_reviewer_id_fkey"
-      columns: ["reviewer_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"lost_found_items": {
-                  Row: {
-                    "category": Database["public"]['Enums']["lf_category"],"contact_pref": string,"created_at": string,"description": string,"expires_at": string,"flagged": boolean,"id": string,"image_path": string | null,"is_demo": boolean,"is_sensitive": boolean,"kind": Database["public"]['Enums']["lf_kind"],"location_label": string,"moderation_note": string | null,"occurred_on": string,"owner_id": string,"status": Database["public"]['Enums']["lf_status"],"title": string,"updated_at": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "category": Database["public"]['Enums']["lf_category"],"contact_pref"?: string,"created_at"?: string,"description": string,"expires_at"?: string,"flagged"?: boolean,"id"?: string,"image_path"?: string | null,"is_demo"?: boolean,"is_sensitive"?: boolean,"kind": Database["public"]['Enums']["lf_kind"],"location_label": string,"moderation_note"?: string | null,"occurred_on": string,"owner_id": string,"status"?: Database["public"]['Enums']["lf_status"],"title": string,"updated_at"?: string
-                  }
-                  Update: {
-                    "category"?: Database["public"]['Enums']["lf_category"],"contact_pref"?: string,"created_at"?: string,"description"?: string,"expires_at"?: string,"flagged"?: boolean,"id"?: string,"image_path"?: string | null,"is_demo"?: boolean,"is_sensitive"?: boolean,"kind"?: Database["public"]['Enums']["lf_kind"],"location_label"?: string,"moderation_note"?: string | null,"occurred_on"?: string,"owner_id"?: string,"status"?: Database["public"]['Enums']["lf_status"],"title"?: string,"updated_at"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "lost_found_items_owner_id_fkey"
-      columns: ["owner_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "lost_found_items_owner_id_fkey"
-      columns: ["owner_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"lost_found_secrets": {
-                  Row: {
-                    "details": string,"item_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "details": string,"item_id": string
-                  }
-                  Update: {
-                    "details"?: string,"item_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "lost_found_secrets_item_id_fkey"
-      columns: ["item_id"]
-isOneToOne: true
-      referencedRelation: "lost_found_items"
       referencedColumns: ["id"]
     }
                   ]
@@ -1267,14 +1171,14 @@ isOneToOne: false
                   ]
                 },"servers": {
                   Row: {
-                    "category": string,"created_at": string,"description": string | null,"icon": string,"id": string,"name": string,"owner_id": string,"visibility": Database["public"]['Enums']["server_visibility"]
+                    "category": string,"cover_url": string | null,"created_at": string,"description": string | null,"icon": string,"id": string,"name": string,"owner_id": string,"visibility": Database["public"]['Enums']["server_visibility"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: string,"created_at"?: string,"description"?: string | null,"icon"?: string,"id"?: string,"name": string,"owner_id": string,"visibility"?: Database["public"]['Enums']["server_visibility"]
+                    "category"?: string,"cover_url"?: string | null,"created_at"?: string,"description"?: string | null,"icon"?: string,"id"?: string,"name": string,"owner_id": string,"visibility"?: Database["public"]['Enums']["server_visibility"]
                   }
                   Update: {
-                    "category"?: string,"created_at"?: string,"description"?: string | null,"icon"?: string,"id"?: string,"name"?: string,"owner_id"?: string,"visibility"?: Database["public"]['Enums']["server_visibility"]
+                    "category"?: string,"cover_url"?: string | null,"created_at"?: string,"description"?: string | null,"icon"?: string,"id"?: string,"name"?: string,"owner_id"?: string,"visibility"?: Database["public"]['Enums']["server_visibility"]
                   }
                   Relationships: [
                     {
@@ -1588,27 +1492,6 @@ isOneToOne: false
 "join_public_server":
 { Args: { "sid": string }; Returns: undefined
                            },
-"lf_complete_handover":
-{ Args: { "p_claim": string }; Returns: undefined
-                           },
-"lf_dispute_claim":
-{ Args: { "p_claim": string,"p_reason": string }; Returns: undefined
-                           },
-"lf_expire_stale":
-{ Args: Record<PropertyKey, never>; Returns: number
-                           },
-"lf_moderate_item":
-{ Args: { "p_action": string,"p_item": string,"p_note"?: string }; Returns: undefined
-                           },
-"lf_review_claim":
-{ Args: { "p_approve": boolean,"p_claim": string,"p_note"?: string }; Returns: undefined
-                           },
-"lf_submit_claim":
-{ Args: { "p_details": string,"p_item": string,"p_lost_item"?: string }; Returns: string
-                           },
-"lf_withdraw_claim":
-{ Args: { "p_claim": string }; Returns: undefined
-                           },
 "list_responders":
 { Args: Record<PropertyKey, never>; Returns: {
               "full_name": string,"id": string
@@ -1765,7 +1648,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"safety_responder"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","lf_category": "id_card"|"wallet"|"keys"|"books"|"bag"|"electronics"|"clothing"|"other","lf_claim_status": "pending"|"approved"|"rejected"|"withdrawn"|"disputed"|"completed","lf_kind": "lost"|"found","lf_status": "open"|"claimed"|"returned"|"closed"|"expired"|"removed","membership_policy": "open"|"approval","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","pulse_category": "water_sanitation"|"electricity_lighting"|"wifi_network"|"maintenance_infrastructure"|"waste_management"|"wildlife"|"safety_hazard"|"other","pulse_severity": "low"|"medium"|"high"|"critical","pulse_status": "submitted"|"under_review"|"verified"|"assigned"|"in_progress"|"resolved"|"rejected"|"closed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","resource_kind": "course"|"elective"|"material"|"link"|"form","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
+            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"safety_responder"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","membership_policy": "open"|"approval","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","pulse_category": "water_sanitation"|"electricity_lighting"|"wifi_network"|"maintenance_infrastructure"|"waste_management"|"wildlife"|"safety_hazard"|"other","pulse_severity": "low"|"medium"|"high"|"critical","pulse_status": "submitted"|"under_review"|"verified"|"assigned"|"in_progress"|"resolved"|"rejected"|"closed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","resource_kind": "course"|"elective"|"material"|"link"|"form","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1881,7 +1764,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "safety_responder", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"lf_category": ["id_card", "wallet", "keys", "books", "bag", "electronics", "clothing", "other"],"lf_claim_status": ["pending", "approved", "rejected", "withdrawn", "disputed", "completed"],"lf_kind": ["lost", "found"],"lf_status": ["open", "claimed", "returned", "closed", "expired", "removed"],"membership_policy": ["open", "approval"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"pulse_category": ["water_sanitation", "electricity_lighting", "wifi_network", "maintenance_infrastructure", "waste_management", "wildlife", "safety_hazard", "other"],"pulse_severity": ["low", "medium", "high", "critical"],"pulse_status": ["submitted", "under_review", "verified", "assigned", "in_progress", "resolved", "rejected", "closed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"resource_kind": ["course", "elective", "material", "link", "form"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
+            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "safety_responder", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"membership_policy": ["open", "approval"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"pulse_category": ["water_sanitation", "electricity_lighting", "wifi_network", "maintenance_infrastructure", "waste_management", "wildlife", "safety_hazard", "other"],"pulse_severity": ["low", "medium", "high", "critical"],"pulse_status": ["submitted", "under_review", "verified", "assigned", "in_progress", "resolved", "rejected", "closed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"resource_kind": ["course", "elective", "material", "link", "form"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
           }
         }
 } as const

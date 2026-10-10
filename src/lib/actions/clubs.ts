@@ -92,6 +92,7 @@ export async function createEvent(input: unknown) {
         ends_at: toIso(d.ends_at)!,
         capacity: d.capacity ?? null,
         registration_deadline: toIso(d.registration_deadline),
+        cover_url: d.cover_url,
         club_id: d.club_id ?? null,
         organizer_id: v.userId,
       })
@@ -115,6 +116,7 @@ export async function updateEvent(input: unknown) {
         ends_at: toIso(d.ends_at)!,
         capacity: d.capacity ?? null,
         registration_deadline: toIso(d.registration_deadline),
+        cover_url: d.cover_url,
       })
       .eq("id", eventId)
       .select("id");

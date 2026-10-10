@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FormField, fieldAria, selectClass } from "@/components/common/form-field";
+import { CoverField } from "@/components/common/cover-field";
 import { createServer, updateServer } from "@/lib/actions/communities";
 import { serverSchema } from "@/lib/validation";
 import { SERVER_CATEGORIES } from "@/lib/constants";
@@ -27,7 +28,7 @@ export function CreateServerDialog({ existing }: { existing?: Values & { id: str
   const [pending, start] = useTransition();
   const form = useForm<Values, unknown, z.output<typeof serverSchema>>({
     resolver: zodResolver(serverSchema),
-    defaultValues: existing ?? { name: "", description: "", icon: "💬", category: "General", visibility: "public" },
+    defaultValues: existing ?? { name: "", description: "", icon: "💬", category: "General", visibility: "public", cover_url: "" },
   });
   const { errors } = form.formState;
   const icon = form.watch("icon");
@@ -37,7 +38,7 @@ export function CreateServerDialog({ existing }: { existing?: Values & { id: str
       <DialogTrigger render={<Button variant={existing ? "outline" : "default"} />}>
         {existing ? "Edit details" : <><Plus /> Create community</>}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{existing ? "Edit community" : "Create a community"}</DialogTitle>
           <DialogDescription>You&apos;ll be the owner and can appoint moderators. A #general channel is created automatically.</DialogDescription>
@@ -93,6 +94,7 @@ export function CreateServerDialog({ existing }: { existing?: Values & { id: str
               </select>
             </FormField>
           </div>
+          <CoverField value={form.watch("cover_url")} onChange={(url) => form.setValue("cover_url", url, { shouldDirty: true })} />
         </form>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>

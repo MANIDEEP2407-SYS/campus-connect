@@ -5,6 +5,7 @@ import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { ToneBadge } from "@/components/common/tone-badge";
+import { CoverImage } from "@/components/common/cover-image";
 import { selectClass } from "@/components/common/form-field";
 import { ClubTabs } from "@/components/clubs/club-tabs";
 import { ClubFormDialog } from "@/components/clubs/club-form-dialog";
@@ -20,7 +21,7 @@ export default async function ClubsPage({ searchParams }: PageProps<"/clubs">) {
   const official = sp.official === "1";
   const v = await requireViewer();
 
-  let query = v.supabase.from("clubs").select("id, slug, name, tagline, category, logo, is_official, membership_policy, club_members(count), events(count)").order("is_official", { ascending: false }).order("name");
+  let query = v.supabase.from("clubs").select("id, slug, name, tagline, category, logo, cover_url, is_official, membership_policy, club_members(count), events(count)").order("is_official", { ascending: false }).order("name");
   if (q) query = query.or(`name.ilike.%${q}%,tagline.ilike.%${q}%,description.ilike.%${q}%`);
   if (category) query = query.eq("category", category);
   if (official) query = query.eq("is_official", true);
@@ -63,10 +64,14 @@ export default async function ClubsPage({ searchParams }: PageProps<"/clubs">) {
             const st = status.get(c.id);
             return (
               <li key={c.id}>
-                <Link href={`/clubs/${c.slug}`} className="flex h-full flex-col rounded-xl border bg-card p-4 transition-colors hover:border-primary/40">
+                <Link href={`/clubs/${c.slug}`} className="group flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40">
+                  <div className="overflow-hidden">
+                    <CoverImage src={c.cover_url} emoji={c.logo} width={640} className="h-32 w-full transition-transform duration-300 group-hover:scale-105" />
+                  </div>
+                  <div className="flex flex-1 flex-col p-4 pt-0">
                   <div className="flex items-start gap-3">
-                    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-muted text-2xl" aria-hidden>{c.logo}</span>
-                    <div className="min-w-0">
+                    <span className="-mt-6 grid size-12 shrink-0 place-items-center rounded-xl border-2 border-card bg-muted text-2xl shadow-sm" aria-hidden>{c.logo}</span>
+                    <div className="min-w-0 pt-2">
                       <p className="font-medium">{c.name}</p>
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {c.is_official ? <ToneBadge tone="primary"><BadgeCheck className="size-3" /> Official</ToneBadge> : <ToneBadge>Student-created</ToneBadge>}
@@ -80,6 +85,7 @@ export default async function ClubsPage({ searchParams }: PageProps<"/clubs">) {
                     <span className="flex items-center gap-1"><CalendarDays className="size-3.5" /> {c.events[0]?.count ?? 0} events</span>
                     {st === "approved" && <span className="ml-auto text-primary">Member</span>}
                     {st === "pending" && <span className="ml-auto">Request pending</span>}
+                  </div>
                   </div>
                 </Link>
               </li>

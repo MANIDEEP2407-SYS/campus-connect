@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { recommend } from "@/lib/discover";
-import { eventSchema, lfItemSchema, pulseReportSchema, profileSchema } from "@/lib/validation";
+import { clubSchema, eventSchema, pulseReportSchema, profileSchema } from "@/lib/validation";
 
 describe("People recommendations", () => {
   const me = { id: "me", department: "Computer Science & Engineering", skills: ["Python"], interests: ["Healthcare Innovation", "Machine Learning"], goals: ["Biomedical Devices"] };
@@ -19,11 +19,13 @@ describe("People recommendations", () => {
 });
 
 describe("Validation schemas", () => {
-  it("rejects ID/phone-like numbers in public Lost & Found text", () => {
-    const base = { kind: "found", category: "id_card", title: "ID card", description: "Found a card", location_label: "Main Canteen", occurred_on: "2026-10-10", contact_pref: "in_app" };
-    expect(lfItemSchema.safeParse({ ...base, description: "Card number 2023 4567 8901 found" }).success).toBe(false);
-    expect(lfItemSchema.safeParse({ ...base, description: "Call me at 98765 43210 please" }).success).toBe(false);
-    expect(lfItemSchema.safeParse({ ...base, description: "Blue lanyard, found near billing" }).success).toBe(true);
+  it("only accepts cover images from our upload bucket or the curated photo host", () => {
+    const base = { name: "Test Club", slug: "test-club", category: "Technical", logo: "✨", membership_policy: "open" };
+    const bucket = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/u/1.jpg`;
+    expect(clubSchema.safeParse({ ...base, cover_url: bucket }).success).toBe(true);
+    expect(clubSchema.safeParse({ ...base, cover_url: "https://images.unsplash.com/photo-1532186773960-85649e5cb70b?w=1200" }).success).toBe(true);
+    expect(clubSchema.safeParse({ ...base, cover_url: "https://tracker.example.com/pixel.gif" }).success).toBe(false);
+    expect(clubSchema.safeParse({ ...base, cover_url: "" }).data?.cover_url).toBeNull();
   });
 
   it("keeps CampusPulse coordinates inside the campus box and images optional", () => {

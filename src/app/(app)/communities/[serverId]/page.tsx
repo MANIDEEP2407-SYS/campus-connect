@@ -4,6 +4,7 @@ import { requireViewer } from "@/lib/auth";
 import { getServerContext } from "@/lib/queries/communities";
 import { JoinServerPanel } from "@/components/communities/join-server-panel";
 import { PageHeader } from "@/components/common/page-header";
+import { CoverImage } from "@/components/common/cover-image";
 
 export default async function ServerIndex({ params }: PageProps<"/communities/[serverId]">) {
   const { serverId } = await params;
@@ -21,13 +22,16 @@ export default async function ServerIndex({ params }: PageProps<"/communities/[s
   return (
     <div className="mx-auto max-w-xl">
       <PageHeader back={{ href: "/communities", label: "Communities" }} title={<span className="flex items-center gap-3"><span aria-hidden>{ctx.server.icon}</span>{ctx.server.name}</span>} />
-      <div className="rounded-xl border bg-card p-6">
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <CoverImage src={ctx.server.cover_url} emoji={ctx.server.icon} width={1000} priority className="h-36 w-full text-5xl" />
+      <div className="p-6">
         <p className="mb-2 flex items-center gap-2 text-sm text-warning"><Lock className="size-4" /> Private community</p>
         {ctx.server.description && <p className="text-sm text-muted-foreground">{ctx.server.description}</p>}
         <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground"><Users className="size-3.5" /> Channels, members and messages are visible to members only</p>
         <div className="mt-5">
           <JoinServerPanel serverId={serverId} visibility={ctx.server.visibility} requestStatus={request?.status ?? null} />
         </div>
+      </div>
       </div>
     </div>
   );

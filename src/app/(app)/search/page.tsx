@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, CalendarDays, FlaskConical, MessagesSquare, PackageSearch, Search, User, Users } from "lucide-react";
+import { BookOpen, CalendarDays, FlaskConical, MessagesSquare, Search, User, Users } from "lucide-react";
 import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
@@ -14,7 +14,6 @@ const KINDS = {
   event: { label: "Events", icon: CalendarDays },
   project: { label: "Research & consultancy", icon: FlaskConical },
   resource: { label: "Academic resources", icon: BookOpen },
-  lost_found: { label: "Lost & Found", icon: PackageSearch },
 } as const;
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
@@ -27,7 +26,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title={q ? `Results for “${q}”` : "Search"} description="People, communities, clubs, events, research, resources and Lost & Found listings." />
+      <PageHeader title={q ? `Results for “${q}”` : "Search"} description="People, communities, clubs, events, research and academic resources." />
       <form className="relative mb-6" role="search">
         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <label htmlFor="sq" className="sr-only">Search</label>

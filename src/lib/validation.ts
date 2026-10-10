@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { PULSE_CATEGORIES, PULSE_SEVERITIES } from "@/lib/pulse";
-import { LF_CATEGORIES } from "@/lib/lostfound";
 
 // Shared by client forms (react-hook-form + zodResolver) and server actions (re-validation).
 
@@ -12,9 +11,13 @@ const tags = (max: number) => z.array(tag).max(max, `At most ${max} items`);
 const optionalText = (max: number) =>
   z.union([z.string().trim().max(max), z.null()]).optional().transform((v) => v || null);
 
-/** Reject long digit runs that look like ID / phone / serial numbers in public text. */
-const noSensitiveNumbers = (s: string) => !/\d[\d\s-]{5,}\d/.test(s);
-const sensitiveMsg = "Don't include ID, phone or serial numbers in public text — add them as private verification details instead.";
+/** Cover images: our public upload bucket, or the curated free-licence demo photo host. */
+const COVER_PREFIXES = [`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/post-images/`, "https://images.unsplash.com/photo-"];
+export const isAllowedCover = (url: string) => COVER_PREFIXES.some((p) => url.startsWith(p));
+const coverUrl = z
+  .union([z.string().trim().max(500).refine((u) => u === "" || isAllowedCover(u), "Upload the cover image here"), z.null()])
+  .optional()
+  .transform((v) => v || null);
 
 export const signInSchema = z.object({
   email: z.email("Enter a valid email"),
@@ -61,6 +64,7 @@ export const serverSchema = z.object({
   icon: z.string().trim().min(1).max(8),
   category: z.string().trim().min(1).max(40),
   visibility: z.enum(["public", "private"]),
+  cover_url: coverUrl,
 });
 
 export const channelSchema = z.object({
@@ -83,6 +87,7 @@ export const clubSchema = z.object({
   logo: z.string().trim().min(1).max(8),
   membership_policy: z.enum(["open", "approval"]),
   requirements: optionalText(500),
+  cover_url: coverUrl,
 });
 
 export const eventSchema = z
@@ -96,6 +101,7 @@ export const eventSchema = z
     capacity: z.coerce.number().int().min(1).max(10000).optional().nullable().or(z.literal("").transform(() => null)),
     registration_deadline: z.string().optional().nullable().transform((v) => v || null),
     club_id: z.uuid().nullable().optional().or(z.literal("").transform(() => null)),
+    cover_url: coverUrl,
   })
   .refine((v) => new Date(v.ends_at) > new Date(v.starts_at), { message: "End must be after start", path: ["ends_at"] })
   .refine((v) => !v.registration_deadline || new Date(v.registration_deadline) <= new Date(v.ends_at), {
@@ -147,27 +153,8 @@ export const pulseReportSchema = z.object({
 });
 export type PulseReportInput = z.input<typeof pulseReportSchema>;
 
-export const lfItemSchema = z.object({
-  kind: z.enum(["lost", "found"]),
-  category: z.enum(LF_CATEGORIES),
-  title: z.string().trim().min(3).max(100).refine(noSensitiveNumbers, sensitiveMsg),
-  description: z.string().trim().min(10, "Add a short description (10+ characters)").max(1500).refine(noSensitiveNumbers, sensitiveMsg),
-  location_label: z.string().trim().min(2).max(120),
-  occurred_on: z.iso.date("Choose a date"),
-  contact_pref: z.enum(["in_app", "security_office"]),
-  secret_details: optionalText(1000),
-  image_path: z.string().max(300).nullable().optional(),
-});
-export type LfItemInput = z.input<typeof lfItemSchema>;
-
-export const claimSchema = z.object({
-  item_id: z.uuid(),
-  details: z.string().trim().min(10, "Describe distinguishing details only the owner would know").max(1500),
-  lost_item_id: z.uuid().nullable().optional().or(z.literal("").transform(() => null)),
-});
-
 export const flagSchema = z.object({
-  target_type: z.enum(["post", "comment", "message", "direct_message", "server", "lf_item", "profile", "pulse_report", "resource"]),
+  target_type: z.enum(["post", "comment", "message", "direct_message", "server", "profile", "pulse_report", "resource"]),
   target_id: z.uuid(),
   category: z.enum(["harassment", "threat", "hate", "sexual_harassment", "personal_info", "self_harm", "spam", "other"]).optional(),
   reason: z.string().trim().min(5, "Tell moderators what's wrong").max(1000),

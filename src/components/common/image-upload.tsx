@@ -7,7 +7,7 @@ import { getBrowserClient } from "@/lib/supabase/client";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 
-export type Bucket = "avatars" | "post-images" | "pulse-evidence" | "lostfound";
+export type Bucket = "avatars" | "post-images" | "pulse-evidence";
 
 /**
  * Uploads an image directly to Supabase Storage under `<userId>/…` (enforced by storage RLS)

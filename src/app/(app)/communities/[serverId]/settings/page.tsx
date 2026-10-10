@@ -34,7 +34,7 @@ export default async function ServerSettings({ params }: PageProps<"/communities
         back={{ href: `/communities/${serverId}`, label: s.name }}
         title="Community settings"
         description={`You are ${isOwner ? "the owner" : "a moderator"} of ${s.name}.`}
-        actions={<CreateServerDialog existing={{ id: s.id, name: s.name, description: s.description ?? "", icon: s.icon, category: s.category, visibility: s.visibility }} />}
+        actions={<CreateServerDialog existing={{ id: s.id, name: s.name, description: s.description ?? "", icon: s.icon, category: s.category, visibility: s.visibility, cover_url: s.cover_url ?? "" }} />}
       />
 
       <section className="rounded-xl border bg-card p-5">
