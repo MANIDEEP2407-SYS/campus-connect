@@ -3,7 +3,11 @@
 **One Campus. Every Connection. Every Opportunity.**
 A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vidyapeetham, Coimbatore — communities with realtime chat, social feed, people discovery, clubs & events, research & consultancy, academic resources, **CampusPulse** issue reporting, **Lost & Found**, **Amrita Microsoft 365 sign-in** and **CampusShield** AI-assisted moderation.
 
+**Live demo:** https://campus-connect-nu-nine.vercel.app
+
 > Prototype. Not an official university system. All demo people, clubs, events, incidents and listings are **fictional**. CampusPulse is not an emergency service.
+>
+> The hosted demo uses development sign-in (Microsoft sign-in awaits university configuration) and the development moderation mock (no AI key configured). Hosted demo accounts use a private password, not the one in `.env.example`.
 
 ## Tech stack
 

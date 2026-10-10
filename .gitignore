@@ -44,3 +44,6 @@ next-env.d.ts
 
 # local editor/agent tooling
 .claude/
+
+.vercel
+.env*

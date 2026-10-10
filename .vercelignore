@@ -1,0 +1,8 @@
+# Never upload local secrets or tooling to Vercel builds (env vars come from the Vercel project).
+.env*
+!.env.example
+.claude
+.vercel
+.next
+node_modules
+supabase/.temp
