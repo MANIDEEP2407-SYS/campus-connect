@@ -29,14 +29,14 @@ type Person = {
   skills: string[];
   interests: string[];
   goals?: string[];
-  roles?: ("platform_admin" | "safety_responder" | "moderator" | "faculty")[];
+  roles?: ("platform_admin" | "incident_reviewer" | "moderator" | "faculty")[];
   visibility?: "campus" | "connections" | "hidden";
 };
 
 const PEOPLE: Person[] = [
   { key: "admin", name: "Demo Platform Admin", affiliation: "staff", department: "Administration", bio: "Fictional administrator account for the CampusConnect demo.", skills: ["Operations"], interests: ["Campus life"], roles: ["platform_admin", "moderator"] },
-  { key: "security", name: "Ravi Kumar (Demo Security)", affiliation: "staff", department: "Administration", bio: "Fictional campus security responder for the demo.", skills: ["Incident response"], interests: ["Safety"], roles: ["safety_responder"] },
-  { key: "maintenance", name: "Lakshmi Iyer (Demo Maintenance)", affiliation: "staff", department: "Administration", bio: "Fictional estate & maintenance responder for the demo.", skills: ["Facilities"], interests: ["Sustainability"], roles: ["safety_responder"] },
+  { key: "security", name: "Ravi Kumar (Demo Grievance Cell)", affiliation: "staff", department: "Administration", bio: "Fictional central grievance cell reviewer for the demo.", skills: ["Investigations"], interests: ["Student welfare"], roles: ["incident_reviewer"] },
+  { key: "maintenance", name: "Dr. Lakshmi Iyer (Demo CSE Reviewer)", affiliation: "faculty", department: "Computer Science & Engineering", bio: "Fictional department incident reviewer for CSE.", skills: ["Mentoring"], interests: ["Student welfare"], roles: ["incident_reviewer", "faculty"] },
   { key: "moderator", name: "Meera Nair", affiliation: "staff", department: "Administration", bio: "Fictional community moderator.", skills: ["Community management"], interests: ["Writing"], roles: ["moderator"] },
   { key: "anand", name: "Dr. Anand Krishnan", affiliation: "faculty", department: "Computer Science & Engineering", bio: "Fictional faculty member working on medical imaging and trustworthy ML.", skills: ["Machine Learning", "Computer Vision", "Python"], interests: ["Healthcare Innovation", "Machine Learning"], roles: ["faculty"] },
   { key: "priya", name: "Dr. Priya Raghavan", affiliation: "faculty", department: "Biomedical Engineering", bio: "Fictional faculty member building low-cost diagnostic devices.", skills: ["Biomedical Devices", "Signal Processing", "Embedded Systems"], interests: ["Healthcare Innovation", "Social Impact"], roles: ["faculty"] },
@@ -80,9 +80,8 @@ async function removeOldDemoUsers() {
 
 async function main() {
   console.log("Removing previous demo accounts…");
-  // Clubs and official resources outlive their creators (ON DELETE SET NULL), so remove them explicitly.
+  // Clubs outlive their creators (ON DELETE SET NULL), so remove them explicitly.
   await must(db.from("clubs").delete().in("slug", ["circuit-breakers", "byte-brigade", "natya-collective", "green-campus", "lens-and-light", "launchpad-circle"]), "cleanup clubs");
-  await must(db.from("resources").delete().in("title", ["Amrita Vishwa Vidyapeetham — official website", "Academic forms — use the official student portal"]), "cleanup resources");
   await removeOldDemoUsers();
 
   console.log("Creating demo accounts…");
@@ -204,7 +203,6 @@ async function main() {
     await must(db.from("server_members").insert(s.members.map((m, i) => ({ server_id: row.id, user_id: id[m], role: i === 0 ? ("moderator" as const) : ("member" as const) }))), "server members");
   }
   await db.from("clubs").update({ server_id: server.robo }).eq("id", club["circuit-breakers"]);
-  await db.from("resources").insert({ kind: "elective", title: "Computer Vision elective — study community (sample)", description: "Sample elective entry linking to a course community. Check the official course list on the university portal for actual offerings.", department: "Computer Science & Engineering", is_official: false, server_id: server.cv, submitted_by: id.anand, tags: ["elective", "computer vision"] });
 
   const msgs: [string, string, string, number][] = [
     ["ai:general", "aditi", "Welcome everyone 👋 Post what you're working on this semester!", -50],
@@ -267,68 +265,41 @@ async function main() {
     { project_id: projectIds[1], applicant_id: id.rahul, statement: "I've built a basic ECG front-end on a breadboard and want to take it to a proper PCB with low-power design.", relevant_skills: ["Embedded Systems", "Arduino"], availability: "6 hrs/week", status: "shortlisted" },
   ], { defaultToNull: false }), "applications");
 
-  console.log("Academic resources…");
-  await must(db.from("resources").insert([
-    { kind: "link", title: "Amrita Vishwa Vidyapeetham — official website", description: "Official university website for announcements, programmes and academic information.", url: "https://www.amrita.edu/", source_label: "amrita.edu (public website)", is_official: true, tags: ["official"] },
-    { kind: "form", title: "Academic forms — use the official student portal", description: "Leave, bonafide and other academic forms are handled in the university's official systems. CampusConnect does not process them.", source_label: "Placeholder — no integration", is_official: true, tags: ["forms"] },
-    { kind: "course", title: "Data Structures — study guide (sample)", description: "Student-made revision checklist: arrays, linked lists, trees, heaps, graphs. Sample content.", course_code: "SAMPLE-DS", department: "Computer Science & Engineering", submitted_by: id.aditi, tags: ["revision"] },
-    { kind: "material", title: "Signals & Systems — worked problems (sample)", description: "Practice problems with solutions shared by seniors. Sample content.", course_code: "SAMPLE-SS", department: "Electronics & Communication Engineering", submitted_by: id.sneha, tags: ["practice"] },
-    { kind: "elective", title: "Renewable Energy Systems elective — student notes (sample)", description: "Notes on PV sizing and microgrid basics. Sample content.", department: "Electrical & Electronics Engineering", submitted_by: id.nikhil, tags: ["elective"] },
-    { kind: "link", title: "NPTEL — free online courses", description: "Public MOOC platform with many engineering courses.", url: "https://nptel.ac.in/", source_label: "nptel.ac.in", submitted_by: id.karthik, tags: ["mooc"] },
-  ], { defaultToNull: false }), "resources");
-
-  console.log("CampusPulse demo reports (fictional)…");
-  const reports = [
-    { by: "aditi", category: "wildlife", sub: "Snake", title: "Snake seen near library walkway (demo)", desc: "FICTIONAL DEMO REPORT. A snake was seen crossing the walkway beside the library around 7 pm. People were keeping their distance.", severity: "high", loc: "Library Walkway", lat: 10.90294, lng: 76.90102, status: "verified", assign: null, alert: "Avoid the library walkway after dark until security clears the area. Do not approach or try to catch the snake.", h: -3 },
-    { by: "vikram", category: "water_sanitation", sub: "No water supply", title: "No water on 2nd floor, Hostel Area (North) (demo)", desc: "FICTIONAL DEMO REPORT. Taps on the second floor have been dry since morning.", severity: "high", loc: "Hostel Area (North)", lat: 10.90561, lng: 76.90148, status: "in_progress", assign: "maintenance", h: -9 },
-    { by: "fatima", category: "wifi_network", sub: "No connectivity", title: "Wi-Fi down in Academic Block II labs (demo)", desc: "FICTIONAL DEMO REPORT. Lab machines can't reach the login portal since 10 am.", severity: "medium", loc: "Academic Block II", lat: 10.90382, lng: 76.90121, status: "submitted", assign: null, h: -1 },
-    { by: "nikhil", category: "electricity_lighting", sub: "Street light out", title: "Street lights out near parking (demo)", desc: "FICTIONAL DEMO REPORT. Three lights near the parking entrance are off.", severity: "medium", loc: "Parking Area", lat: 10.90108, lng: 76.89861, status: "resolved", assign: "maintenance", resolution: "Replaced faulty driver units on three poles.", h: -50 },
-    { by: "divya", category: "waste_management", sub: "Overflowing bin", title: "Overflowing bins behind the canteen (demo)", desc: "FICTIONAL DEMO REPORT. Bins are overflowing and attracting crows.", severity: "low", loc: "Main Canteen", lat: 10.90172, lng: 76.8995, status: "under_review", assign: null, h: -6 },
-    { by: "arjun", category: "safety_hazard", sub: "Fallen branch/tree", title: "Large branch fallen across path near Sports Complex (demo)", desc: "FICTIONAL DEMO REPORT. A large branch is blocking half the path after the rain.", severity: "high", loc: "Sports Complex", lat: 10.90081, lng: 76.90238, status: "assigned", assign: "security", h: -5 },
+  console.log("Incident reports (fictional)…");
+  const incidents = [
+    { by: "aditi", direction: "about_staff", category: "unprofessional_conduct", subject: "Lab instructor (name withheld in demo)", dept: "Computer Science & Engineering", title: "Students repeatedly sent out of lab without explanation (demo)", desc: "FICTIONAL DEMO REPORT. During the last three lab sessions the instructor asked several students to leave without giving a reason, and we missed graded exercises as a result.", loc: "Academic Block II", ctx: "Data Structures lab", status: "under_review", d: -4 },
+    { by: "rahul", direction: "about_staff", category: "verbal_abuse", subject: "Visiting lecturer (name withheld in demo)", dept: "Biomedical Engineering", title: "Insulting remarks during a project review (demo)", desc: "FICTIONAL DEMO REPORT. During the mid-semester project review, the lecturer made insulting remarks about a teammate's background in front of the class.", loc: "Academic Block I", ctx: "Project review", status: "submitted", d: -1 },
+    { by: "anand", direction: "about_student", category: "academic_misconduct", subject: "Third-year student (name withheld in demo)", dept: "Computer Science & Engineering", title: "Identical submissions in a graded assignment (demo)", desc: "FICTIONAL DEMO REPORT. Two submissions for the machine learning assignment are identical, including comments and variable names, which suggests copying.", loc: null, ctx: "Machine Learning course", status: "action_taken", outcome: "Both students met the academic integrity committee; the assignment will be re-evaluated.", d: -12 },
   ] as const;
-  const flow: Record<string, string[]> = {
-    submitted: ["submitted"], under_review: ["submitted", "under_review"], verified: ["submitted", "verified"],
-    assigned: ["submitted", "verified", "assigned"], in_progress: ["submitted", "verified", "assigned", "in_progress"],
-    resolved: ["submitted", "verified", "assigned", "in_progress", "resolved"],
-  };
-  const reportIds: string[] = [];
-  for (const r of reports) {
-    const created = new Date(Date.now() + r.h * 3600_000);
-    const safety = r.category === "wildlife" || r.category === "safety_hazard";
-    const sevBase = { critical: 40, high: 30, medium: 20, low: 10 }[r.severity];
-    const row = await must(db.from("reports").insert({
-      reporter_id: id[r.by], category: r.category, subcategory: r.sub, title: r.title, description: r.desc, severity: r.severity,
-      priority: sevBase + (safety ? 15 : r.category === "water_sanitation" || r.category === "electricity_lighting" ? 5 : 0),
-      is_safety: safety, location_label: r.loc, approx_lat: Number(r.lat.toFixed(3)), approx_lng: Number(r.lng.toFixed(3)), status: r.status,
-      assigned_to: r.assign ? id[r.assign] : null, resolution_note: "resolution" in r ? r.resolution : null,
-      alert_message: "alert" in r ? r.alert : null, expires_at: safety ? new Date(Date.now() + 10 * 3600_000).toISOString() : null,
-      is_demo: true, created_at: created.toISOString(), confirmations_count: r.category === "water_sanitation" ? 2 : 0,
-    }).select("id").single(), `report ${r.title}`);
-    reportIds.push(row.id);
-    await must(db.from("report_locations").insert({ report_id: row.id, lat: r.lat, lng: r.lng }), "location");
-    const steps = flow[r.status]!;
-    let prev: string | null = null;
-    for (const [i, s] of steps.entries()) {
-      await must(db.from("report_updates").insert({
-        report_id: row.id, actor_id: i === 0 ? id[r.by] : id[r.assign ?? "security"], kind: s === "assigned" ? "assignment" : "status",
-        from_status: prev, to_status: s, note: i === 0 ? "Report submitted" : s === "resolved" && "resolution" in r ? r.resolution : null,
-        created_at: new Date(created.getTime() + i * 20 * 60_000).toISOString(),
-      }), "update");
-      prev = s;
+  const incidentIds: string[] = [];
+  for (const r of incidents) {
+    const created = new Date(Date.now() + r.d * 86_400_000);
+    const row = await must(db.from("incidents").insert({
+      reporter_id: id[r.by], direction: r.direction, category: r.category, subject_name: r.subject, department: r.dept, title: r.title,
+      description: r.desc, occurred_on: dateOnly(new Date(created.getTime() - 86_400_000)), location: r.loc, context: r.ctx, status: r.status,
+      outcome_note: "outcome" in r ? r.outcome : null, reviewed_by: r.status === "submitted" ? null : id.security, is_demo: true, created_at: created.toISOString(),
+    }).select("id").single(), `incident ${r.title}`);
+    incidentIds.push(row.id);
+    const steps = r.status === "submitted" ? ["submitted"] : r.status === "under_review" ? ["submitted", "under_review"] : ["submitted", "under_review", r.status];
+    for (const [i, st] of steps.entries()) {
+      await must(db.from("incident_updates").insert({
+        incident_id: row.id, actor_id: i === 0 ? id[r.by] : id.security, kind: "status", to_status: st,
+        note: i === 0 ? "Report submitted with a truthfulness declaration" : "outcome" in r && st === r.status ? r.outcome : null,
+        created_at: new Date(created.getTime() + i * 6 * 3600_000).toISOString(),
+      }), "incident update");
     }
   }
-  await must(db.from("report_updates").insert({ report_id: reportIds[1], actor_id: id.maintenance, kind: "note", note: "Pump motor tripped; electrician on the way.", is_internal: true }), "internal note");
-  await must(db.from("report_confirmations").insert([{ report_id: reportIds[1], user_id: id.nikhil }, { report_id: reportIds[1], user_id: id.arjun }]), "confirmations");
+  await must(db.from("incident_updates").insert({ incident_id: incidentIds[0], actor_id: id.maintenance, kind: "note", note: "Spoke to the lab coordinator; attendance records requested.", is_internal: true }), "internal note");
 
   console.log("Notifications…");
   await must(db.from("notifications").insert([
     { user_id: id.aditi, type: "research.application", title: "Your application to Quality control for chest X-ray datasets was received", link: `/research/${projectIds[0]}` },
     { user_id: id.priya, type: "server.request", title: "Sneha Pillai requested to join Healthcare Innovation Lab", link: `/communities/${server.health}/settings` },
-    { user_id: id.security, type: "pulse.new", title: "New high report: Snake seen near library walkway (demo)", body: "Library Walkway", link: `/pulse/${reportIds[0]}` },
+    { user_id: id.maintenance, type: "incident.new", title: "New incident report for Computer Science & Engineering", link: `/incidents/${incidentIds[0]}` },
   ], { defaultToNull: false }), "notifications");
 
   console.log(`\nDone. ${PEOPLE.length} demo accounts created on @${DOMAIN} with the DEMO_PASSWORD from your env file.`);
-  console.log("Try: aditi (student), rahul (student), priya (faculty), security (responder), moderator, admin.");
+  console.log("Try: aditi (student), rahul (student), priya (faculty), security (grievance cell reviewer), maintenance (CSE reviewer), moderator, admin.");
 }
 
 main().catch((e) => {

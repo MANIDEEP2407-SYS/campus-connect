@@ -14,7 +14,7 @@ export interface Viewer {
   profile: Tables<"profiles">;
   roles: Set<Role>;
   isAdmin: boolean;
-  isResponder: boolean;
+  isReviewer: boolean;
   isModerator: boolean;
 }
 
@@ -41,7 +41,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     profile,
     roles,
     isAdmin,
-    isResponder: isAdmin || roles.has("safety_responder"),
+    isReviewer: isAdmin || roles.has("incident_reviewer"),
     isModerator: isAdmin || roles.has("moderator"),
   };
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { recommend } from "@/lib/discover";
-import { clubSchema, eventSchema, pulseReportSchema, profileSchema } from "@/lib/validation";
+import { clubSchema, eventSchema, incidentSchema, profileSchema } from "@/lib/validation";
 
 describe("People recommendations", () => {
   const me = { id: "me", department: "Computer Science & Engineering", skills: ["Python"], interests: ["Healthcare Innovation", "Machine Learning"], goals: ["Biomedical Devices"] };
@@ -28,11 +28,12 @@ describe("Validation schemas", () => {
     expect(clubSchema.safeParse({ ...base, cover_url: "" }).data?.cover_url).toBeNull();
   });
 
-  it("keeps CampusPulse coordinates inside the campus box and images optional", () => {
-    const base = { category: "wildlife", title: "Snake near walkway", description: "Seen crossing the path", severity: "high", location_label: "Library Walkway" };
-    expect(pulseReportSchema.safeParse({ ...base, lat: 10.903, lng: 76.901 }).success).toBe(true);
-    expect(pulseReportSchema.safeParse({ ...base, lat: 13.08, lng: 80.27 }).success).toBe(false);
-    expect(pulseReportSchema.safeParse({ ...base, lat: null, lng: null }).success).toBe(true);
+  it("requires the truthfulness declaration and a real date on incident reports", () => {
+    const base = { category: "verbal_abuse", subject_name: "Lab instructor", department: "Physics", title: "Shouting in lab", description: "The instructor shouted insults at the batch during the lab session.", occurred_on: "2026-10-10" };
+    expect(incidentSchema.safeParse({ ...base, declaration: true }).success).toBe(true);
+    expect(incidentSchema.safeParse({ ...base, declaration: false }).success).toBe(false);
+    expect(incidentSchema.safeParse({ ...base, declaration: true, occurred_on: "yesterday" }).success).toBe(false);
+    expect(incidentSchema.safeParse({ ...base, declaration: true, description: "Too short" }).success).toBe(false);
   });
 
   it("validates event ordering and deadlines", () => {

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { z } from "zod";
 import {
   applicationSchema, channelSchema, clubSchema, eventSchema, postSchema,
-  profileSchema, projectSchema, pulseReportSchema, resourceSchema, serverSchema,
+  incidentSchema, profileSchema, projectSchema, serverSchema,
 } from "@/lib/validation";
 
 const UUID = "11111111-2222-4333-8444-555555555555";
@@ -20,8 +20,7 @@ const cases: [string, z.ZodType, unknown][] = [
   ["event", eventSchema, { title: "Workshop", description: "", category: "Workshop", venue: "AB2", starts_at: `${day}T10:30:00.000Z`, ends_at: `${day}T12:30:00.000Z`, capacity: "", registration_deadline: "", club_id: "", cover_url: "" }],
   ["project", projectSchema, { kind: "research", title: "A research project", abstract: "An abstract that is long enough to pass.", description: "", area: "Other", department: "", required_skills: [], commitment: "4 hrs/week", positions: "2", budget_note: "" }],
   ["application", applicationSchema, { project_id: UUID, statement: "I would like to join because I have relevant experience.", relevant_skills: [], availability: "" }],
-  ["resource", resourceSchema, { kind: "material", title: "Notes", description: "", course_code: "", department: "", url: "", source_label: "", tags: [] }],
-  ["pulse", pulseReportSchema, { category: "other", subcategory: "", title: "Broken bench", description: "A bench is broken near AB1", severity: "low", location_label: "AB1", lat: null, lng: null }],
+  ["incident", incidentSchema, { category: "other", subject_name: "A teacher", department: "Mathematics", title: "Incident in class", description: "A description of what happened that is long enough.", occurred_on: day, location: "", context: "", witnesses: "", declaration: true }],
   ["post", postSchema, { body: "Hello", image_path: null, club_id: null, is_announcement: false }],
 ];
 

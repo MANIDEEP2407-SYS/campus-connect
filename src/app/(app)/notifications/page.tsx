@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Bell, BellRing } from "lucide-react";
+import { Bell } from "lucide-react";
 import { requireViewer } from "@/lib/auth";
 import { PageHeader } from "@/components/common/page-header";
 import { EmptyState } from "@/components/common/empty-state";
@@ -15,8 +15,8 @@ export const metadata: Metadata = { title: "Notifications" };
 const GROUP: Record<string, string> = {
   dm: "Messages", follow: "Social", like: "Social", comment: "Social", "server.join": "Communities", "server.request": "Communities", "server.request.decided": "Communities",
   "club.request": "Clubs", "club.decided": "Clubs", "event.registered": "Events", "event.reminder": "Events", "event.updated": "Events",
-  "research.application": "Research", "research.status": "Research", "pulse.new": "CampusPulse", "pulse.status": "CampusPulse", "pulse.assigned": "CampusPulse",
-  "pulse.alert": "Safety alert", moderation: "Moderation", role: "Account",
+  "research.application": "Research", "research.status": "Research", "incident.new": "Incident reports", "incident.status": "Incident reports",
+  moderation: "Moderation", role: "Account",
 };
 
 export default async function NotificationsPage({ searchParams }: PageProps<"/notifications">) {
@@ -32,7 +32,7 @@ export default async function NotificationsPage({ searchParams }: PageProps<"/no
     <div className="max-w-3xl">
       <PageHeader
         title="Notifications"
-        description="Updates on your messages, communities, events, applications, reports and listings."
+        description="Updates on your messages, communities, events, applications and incident reports."
         actions={unread > 0 ? <ActionButton action={markNotificationsRead} input={{}} variant="outline">Mark all as read</ActionButton> : undefined}
       />
       <div className="mb-4 flex gap-2 text-sm">
@@ -44,12 +44,11 @@ export default async function NotificationsPage({ searchParams }: PageProps<"/no
       ) : (
         <ul className="divide-y overflow-hidden rounded-xl border bg-card">
           {items.map((n) => {
-            const alert = n.type === "pulse.alert";
             const body = (
-              <div className={cn("flex gap-3 px-4 py-3", !n.read_at && "bg-primary/5", alert && "bg-destructive/10")}>
-                <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : alert ? "bg-destructive" : "bg-primary")} aria-label={n.read_at ? undefined : "Unread"} />
+              <div className={cn("flex gap-3 px-4 py-3", !n.read_at && "bg-primary/5")}>
+                <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.read_at ? "bg-transparent" : "bg-primary")} aria-label={n.read_at ? undefined : "Unread"} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">{alert && <BellRing className="mr-1 inline size-3 text-destructive" />}{GROUP[n.type] ?? "Update"} · <TimeAgo date={n.created_at} /></p>
+                  <p className="text-xs text-muted-foreground">{GROUP[n.type] ?? "Update"} · <TimeAgo date={n.created_at} /></p>
                   <p className={cn("text-sm", !n.read_at && "font-medium")}>{n.title}</p>
                   {n.body && <p className="text-sm text-muted-foreground">{n.body}</p>}
                 </div>

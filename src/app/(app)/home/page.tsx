@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, Newspaper, Siren } from "lucide-react";
+import { CalendarDays, Newspaper } from "lucide-react";
 import { requireViewer } from "@/lib/auth";
 import { getFeed, type FeedTab } from "@/lib/queries/feed";
 import { Composer } from "@/components/feed/composer";
@@ -9,7 +9,6 @@ import { EmptyState } from "@/components/common/empty-state";
 import { ToneBadge } from "@/components/common/tone-badge";
 import { formatDateTime } from "@/components/common/time-ago";
 import { buttonVariants } from "@/components/ui/button";
-import { CATEGORY_META, type PulseCategory } from "@/lib/pulse";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Home" };
@@ -27,11 +26,10 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
   const before = typeof sp.before === "string" ? sp.before : undefined;
   const v = await requireViewer();
 
-  const [feed, { data: myClubs }, { data: events }, { data: warnings }] = await Promise.all([
+  const [feed, { data: myClubs }, { data: events }] = await Promise.all([
     getFeed(v, { tab, before }),
     v.supabase.from("club_members").select("club:clubs(id, name)").eq("user_id", v.userId).eq("role", "coordinator").eq("status", "approved"),
     v.supabase.from("events").select("id, title, starts_at, venue, club:clubs(name)").gte("starts_at", new Date().toISOString()).eq("is_cancelled", false).order("starts_at").limit(4),
-    v.supabase.from("pulse_feed").select("id, title, category, location_label, alert_message").eq("is_active_warning", true).order("priority", { ascending: false }).limit(3),
   ]);
   const coordinatorClubs = (myClubs ?? []).map((m) => m.club).filter((c): c is { id: string; name: string } => Boolean(c));
 
@@ -79,23 +77,6 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
       </div>
 
       <aside className="space-y-4" aria-label="Campus at a glance">
-        {(warnings?.length ?? 0) > 0 && (
-          <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-destructive">
-              <Siren className="size-4" /> Active safety notices
-            </h2>
-            <ul className="space-y-3">
-              {warnings!.map((w) => (
-                <li key={w.id}>
-                  <Link href={`/pulse/${w.id}`} className="block text-sm hover:underline">
-                    {CATEGORY_META[w.category as PulseCategory].emoji} {w.alert_message ?? w.title}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">Near {w.location_label} (approx.)</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
         <section className="rounded-xl border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -118,9 +99,9 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
           )}
         </section>
         <section className="rounded-xl border bg-card p-4 text-sm">
-          <h2 className="mb-2 font-semibold">Spotted a campus issue?</h2>
-          <p className="mb-3 text-muted-foreground">Report water, power, Wi-Fi, maintenance or safety issues so the right team can respond.</p>
-          <Link href="/pulse/new" className={buttonVariants({ size: "sm" })}>Report on CampusPulse</Link>
+          <h2 className="mb-2 font-semibold">Need to report an incident?</h2>
+          <p className="mb-3 text-muted-foreground">Report misconduct involving a teacher or student confidentially. It goes only to the department concerned.</p>
+          <Link href="/incidents/new" className={buttonVariants({ size: "sm" })}>Report an incident</Link>
         </section>
       </aside>
     </div>

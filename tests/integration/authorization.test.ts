@@ -31,7 +31,7 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
   let healthChannelId: string;
 
   beforeAll(async () => {
-    await Promise.all(["aditi", "rahul", "sneha", "fatima", "security", "admin", "priya", "vikram", "nikhil", "arjun"].map(as));
+    await Promise.all(["aditi", "rahul", "sneha", "fatima", "security", "maintenance", "admin", "priya", "vikram", "nikhil", "arjun"].map(as));
     const { data } = await clients.aditi!.from("servers").select("id").eq("name", "Healthcare Innovation Lab").single();
     healthServerId = data!.id;
     const { data: ch } = await clients.aditi!.from("channels").select("id").eq("server_id", healthServerId).eq("name", "datasets").single();
@@ -40,14 +40,14 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
 
   it("anonymous clients can read nothing", async () => {
     const anonClient = createClient<Database>(url!, anon!, { auth: { persistSession: false } });
-    const [{ data: profiles }, { data: posts }, { data: pulse }] = await Promise.all([
+    const [{ data: profiles }, { data: posts }, { data: incidents }] = await Promise.all([
       anonClient.from("profiles").select("id"),
       anonClient.from("posts").select("id"),
-      anonClient.from("pulse_feed").select("id"),
+      anonClient.from("incidents").select("id"),
     ]);
     expect(profiles ?? []).toHaveLength(0);
     expect(posts ?? []).toHaveLength(0);
-    expect(pulse ?? []).toHaveLength(0);
+    expect(incidents ?? []).toHaveLength(0);
   });
 
   describe("private communities", () => {
@@ -106,7 +106,7 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
     it("users cannot grant themselves roles directly or via the admin RPC", async () => {
       const { error: insErr } = await clients.aditi!.from("user_roles").insert({ user_id: ids.aditi!, role: "platform_admin" });
       expect(insErr).not.toBeNull();
-      const { error: rpcErr } = await clients.aditi!.rpc("admin_set_role", { p_user: ids.aditi!, p_role: "safety_responder", p_grant: true });
+      const { error: rpcErr } = await clients.aditi!.rpc("admin_set_role", { p_user: ids.aditi!, p_role: "incident_reviewer", p_grant: true });
       expect(rpcErr?.message).toMatch(/administrators/i);
       const { data: roles } = await clients.aditi!.from("user_roles").select("role").eq("user_id", ids.aditi!);
       expect(roles).toHaveLength(0);
@@ -137,76 +137,64 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
     });
   });
 
-  describe("CampusPulse", () => {
-    let reportId: string;
-
-    it("a student submits a report; it is hidden from others until verified", async () => {
-      const { data, error } = await clients.fatima!.rpc("pulse_submit", {
-        p_category: "maintenance_infrastructure", p_subcategory: "Broken furniture", p_title: `Broken bench test ${Date.now()}`,
-        p_description: "Integration test: bench slats broken near AB3", p_severity: "low", p_lat: 10.9022, p_lng: 76.9019, p_location_label: "Academic Block III",
+  describe("incident reports", () => {
+    let incidentId: string;
+    const submit = (c: Client, dept: string, declaration = true) =>
+      c.rpc("incident_submit", {
+        p_category: "unprofessional_conduct", p_subject_name: "Test subject", p_department: dept, p_title: `Integration test ${Date.now()}`,
+        p_description: "Integration test: a description that is comfortably longer than thirty characters.", p_occurred_on: new Date().toISOString().slice(0, 10),
+        p_location: "", p_context: "", p_witnesses: "", p_declaration: declaration,
       });
+
+    it("requires the truthfulness declaration", async () => {
+      expect((await submit(clients.fatima!, "Computer Science & Engineering", false)).error?.message).toMatch(/declaration/i);
+    });
+
+    it("routes a student's report to that department's reviewers only", async () => {
+      const { data, error } = await submit(clients.fatima!, "Computer Science & Engineering");
       expect(error).toBeNull();
-      reportId = data as string;
-      const { data: own } = await clients.fatima!.from("pulse_feed").select("id, is_mine").eq("id", reportId).single();
-      expect(own!.is_mine).toBe(true);
-      const { data: other } = await clients.aditi!.from("pulse_feed").select("id").eq("id", reportId);
-      expect(other).toHaveLength(0);
+      incidentId = data as string;
+      const { data: own } = await clients.fatima!.from("incidents").select("direction, status").eq("id", incidentId).single();
+      expect(own).toMatchObject({ direction: "about_staff", status: "submitted" });
+      // CSE reviewer and the central (Administration) reviewer can see it; other students and faculty cannot.
+      expect((await clients.maintenance!.from("incidents").select("id").eq("id", incidentId)).data).toHaveLength(1);
+      expect((await clients.security!.from("incidents").select("id").eq("id", incidentId)).data).toHaveLength(1);
+      expect((await clients.aditi!.from("incidents").select("id").eq("id", incidentId)).data).toHaveLength(0);
+      expect((await clients.priya!.from("incidents").select("id").eq("id", incidentId)).data).toHaveLength(0);
+      const { data: notes } = await clients.maintenance!.from("notifications").select("link").eq("type", "incident.new").eq("link", `/incidents/${incidentId}`);
+      expect(notes).toHaveLength(1);
     });
 
-    it("the public feed never exposes reporter identity or precise coordinates", async () => {
-      const { data } = await clients.aditi!.from("pulse_feed").select("*").limit(1).single();
-      expect(data).not.toHaveProperty("reporter_id");
-      const { data: raw } = await clients.aditi!.from("reports").select("reporter_id").neq("reporter_id", ids.aditi!);
-      expect(raw).toHaveLength(0);
-      const { data: locs } = await clients.aditi!.from("report_locations").select("lat");
-      const { data: mineLocs } = await clients.aditi!.from("reports").select("id").eq("reporter_id", ids.aditi!);
-      expect(locs!.length).toBe(mineLocs!.length);
+    it("faculty reports are recorded as about a student", async () => {
+      const { data, error } = await submit(clients.priya!, "Biomedical Engineering");
+      expect(error).toBeNull();
+      const { data: row } = await clients.priya!.from("incidents").select("direction").eq("id", data as string).single();
+      expect(row!.direction).toBe("about_student");
     });
 
-    it("students cannot verify, assign or resolve reports", async () => {
-      const { error } = await clients.aditi!.rpc("pulse_transition", { rid: reportId, p_to: "verified" });
-      expect(error?.message).toMatch(/responders/i);
-      // No UPDATE policy exists on reports: a direct write silently affects zero rows.
-      const { data: updated } = await clients.fatima!.from("reports").update({ status: "resolved" }).eq("id", reportId).select();
+    it("reporters and other users cannot change the status", async () => {
+      expect((await clients.fatima!.rpc("incident_transition", { p_id: incidentId, p_to: "action_taken", p_note: "x" })).error?.message).toMatch(/reviewers/i);
+      expect((await clients.aditi!.rpc("incident_transition", { p_id: incidentId, p_to: "under_review" })).error).not.toBeNull();
+      const { data: updated } = await clients.fatima!.from("incidents").update({ status: "action_taken" }).eq("id", incidentId).select();
       expect(updated ?? []).toHaveLength(0);
-      const { data: still } = await clients.fatima!.from("reports").select("status").eq("id", reportId).single();
-      expect(still!.status).toBe("submitted");
     });
 
-    it("responders move reports through legal transitions only", async () => {
-      const r = clients.security!;
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "resolved", p_note: "skip" })).error?.message).toMatch(/Cannot move/);
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "verified" })).error).toBeNull();
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "assigned" })).error?.message).toMatch(/assign/i);
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "assigned", p_assignee: ids.aditi! })).error?.message).toMatch(/responder/i);
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "assigned", p_assignee: ids.security! })).error).toBeNull();
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "in_progress" })).error).toBeNull();
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "resolved" })).error?.message).toMatch(/resolved/i);
-      expect((await r.rpc("pulse_transition", { rid: reportId, p_to: "resolved", p_note: "Bench repaired" })).error).toBeNull();
-      const { data } = await clients.aditi!.from("pulse_feed").select("status, resolution_note").eq("id", reportId).single();
-      expect(data).toMatchObject({ status: "resolved", resolution_note: "Bench repaired" });
-      const { data: notes } = await clients.fatima!.from("notifications").select("type").eq("type", "pulse.status");
+    it("reviewers follow legal transitions and must record an outcome", async () => {
+      const r = clients.maintenance!;
+      expect((await r.rpc("incident_transition", { p_id: incidentId, p_to: "under_review" })).error).toBeNull();
+      expect((await r.rpc("incident_transition", { p_id: incidentId, p_to: "false_report" })).error?.message).toMatch(/outcome/i);
+      expect((await r.rpc("incident_transition", { p_id: incidentId, p_to: "unsubstantiated", p_note: "No supporting evidence found" })).error).toBeNull();
+      expect((await r.rpc("incident_transition", { p_id: incidentId, p_to: "action_taken", p_note: "late" })).error?.message).toMatch(/Cannot move/);
+      const { data: notes } = await clients.fatima!.from("notifications").select("type").eq("type", "incident.status");
       expect(notes!.length).toBeGreaterThan(0);
     });
 
-    it("internal notes are hidden and the timeline masks who reported", async () => {
-      await clients.security!.rpc("pulse_add_note", { rid: reportId, p_note: "Internal only", p_internal: true });
-      const { data } = await clients.aditi!.from("pulse_timeline").select("note, actor_label, is_internal").eq("report_id", reportId);
+    it("internal notes and reviewer names are hidden from the reporter", async () => {
+      await clients.maintenance!.rpc("incident_add_note", { p_id: incidentId, p_note: "Internal only", p_internal: true });
+      const { data } = await clients.fatima!.from("incident_timeline").select("note, actor_label, is_internal").eq("incident_id", incidentId);
       expect(data!.some((u) => u.is_internal)).toBe(false);
-      expect(data!.every((u) => !["Fatima Zahra"].includes(u.actor_label ?? ""))).toBe(true);
-      const { data: raw } = await clients.aditi!.from("report_updates").select("id").eq("report_id", reportId);
-      expect(raw).toHaveLength(0);
-    });
-
-    it("duplicate submissions and reporter self-confirmation are blocked", async () => {
-      const title = `Leaking pipe test ${Date.now()}`;
-      const args = { p_category: "water_sanitation" as const, p_subcategory: "", p_title: title, p_description: "Integration test duplicate check", p_severity: "low" as const, p_lat: 10.9031, p_lng: 76.8998, p_location_label: "Academic Block I" };
-      const first = await clients.nikhil!.rpc("pulse_submit", args);
-      expect(first.error).toBeNull();
-      expect((await clients.nikhil!.rpc("pulse_submit", args)).error?.message).toMatch(/already submitted/i);
-      expect((await clients.nikhil!.rpc("pulse_confirm", { rid: first.data as string })).error?.message).toMatch(/You submitted/);
-      const { data: similar } = await clients.arjun!.rpc("pulse_find_similar", { p_category: "water_sanitation", p_lat: 10.9031, p_lng: 76.8999 });
-      expect(similar!.some((s) => s.id === first.data)).toBe(true);
+      expect(data!.some((u) => u.actor_label?.includes("Lakshmi"))).toBe(false);
+      expect((await clients.fatima!.from("incident_updates").select("id").eq("incident_id", incidentId)).data).toHaveLength(0);
     });
   });
 

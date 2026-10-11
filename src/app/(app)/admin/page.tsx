@@ -8,7 +8,6 @@ import { ToneBadge } from "@/components/common/tone-badge";
 import { TimeAgo } from "@/components/common/time-ago";
 import { ActionButton } from "@/components/common/action-button";
 import { ModerationActions } from "@/components/admin/moderation-actions";
-import { runMaintenance } from "@/lib/actions/admin";
 import { setClubOfficial } from "@/lib/actions/clubs";
 import { ROLE_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -22,8 +21,6 @@ function targetHref(type: string, id: string) {
   switch (type) {
     case "post": return `/home#post-${id}`;
     case "server": return `/communities/${id}`;
-    case "pulse_report": return `/pulse/${id}`;
-    case "resource": return "/resources";
     default: return null;
   }
 }
@@ -37,8 +34,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
 
   return (
     <div>
-      <PageHeader title="Admin & moderation" description="Review flagged content and verification requests. Every action here is recorded in the audit log."
-        actions={<ActionButton action={runMaintenance} input={{}} variant="outline" size="sm">Run expiry maintenance</ActionButton>} />
+      <PageHeader title="Admin & moderation" description="Review flagged content and verification requests. Every action here is recorded in the audit log." />
       <nav aria-label="Admin sections" className="mb-6 flex gap-1 overflow-x-auto rounded-lg border bg-card p-1">
         {allowed.map((t) => (
           <Link key={t} href={`/admin?tab=${t}`} aria-current={tab === t ? "page" : undefined}
@@ -83,7 +79,7 @@ async function ModerationTab() {
       {reports.map((r) => {
         const pv = preview.get(r.target_id);
         const href = pv?.href ?? targetHref(r.target_type, r.target_id);
-        const removable = ["post", "comment", "message", "resource", "server"].includes(r.target_type);
+        const removable = ["post", "comment", "message", "server"].includes(r.target_type);
         return (
           <li key={r.id} className="rounded-xl border bg-card p-4">
             <div className="flex flex-wrap items-center gap-2">

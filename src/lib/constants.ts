@@ -1,13 +1,6 @@
 export const APP_NAME = "CampusConnect Amrita";
 export const CAMPUS_NAME = "Amrita Vishwa Vidyapeetham, Coimbatore";
 
-/** Approximate campus centre used for the map; locations below are indicative, not surveyed. */
-export const CAMPUS_CENTER: [number, number] = [10.9027, 76.9006];
-export const CAMPUS_BOUNDS: [[number, number], [number, number]] = [
-  [10.88, 76.88],
-  [10.93, 76.93],
-];
-
 export const CAMPUS_LOCATIONS: { label: string; lat: number; lng: number }[] = [
   { label: "Academic Block I", lat: 10.9031, lng: 76.8998 },
   { label: "Academic Block II", lat: 10.9038, lng: 76.9012 },
@@ -53,7 +46,7 @@ export const AFFILIATION_LABELS = {
 
 export const ROLE_LABELS = {
   platform_admin: "Platform admin",
-  safety_responder: "Safety responder",
+  incident_reviewer: "Incident reviewer (department)",
   moderator: "Safety moderator (CampusShield)",
   faculty: "Verified faculty",
 } as const;

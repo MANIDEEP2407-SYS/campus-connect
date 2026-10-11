@@ -359,6 +359,108 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"incident_attachments": {
+                  Row: {
+                    "created_at": string,"id": string,"incident_id": string,"storage_path": string,"uploaded_by": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"incident_id": string,"storage_path": string,"uploaded_by": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"incident_id"?: string,"storage_path"?: string,"uploaded_by"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "incident_attachments_incident_id_fkey"
+      columns: ["incident_id"]
+isOneToOne: false
+      referencedRelation: "incidents"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incident_attachments_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profile_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incident_attachments_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"incident_updates": {
+                  Row: {
+                    "actor_id": string | null,"created_at": string,"id": string,"incident_id": string,"is_internal": boolean,"kind": string,"note": string | null,"to_status": Database["public"]['Enums']["incident_status"] | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"created_at"?: string,"id"?: string,"incident_id": string,"is_internal"?: boolean,"kind": string,"note"?: string | null,"to_status"?: Database["public"]['Enums']["incident_status"] | null
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"created_at"?: string,"id"?: string,"incident_id"?: string,"is_internal"?: boolean,"kind"?: string,"note"?: string | null,"to_status"?: Database["public"]['Enums']["incident_status"] | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "incident_updates_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profile_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incident_updates_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incident_updates_incident_id_fkey"
+      columns: ["incident_id"]
+isOneToOne: false
+      referencedRelation: "incidents"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"incidents": {
+                  Row: {
+                    "category": Database["public"]['Enums']["incident_category"],"context": string | null,"created_at": string,"declared_at": string,"department": string,"description": string,"direction": Database["public"]['Enums']["incident_direction"],"id": string,"is_demo": boolean,"location": string | null,"occurred_on": string,"outcome_note": string | null,"ref_code": string,"reporter_id": string,"reviewed_by": string | null,"status": Database["public"]['Enums']["incident_status"],"subject_name": string,"title": string,"updated_at": string,"witnesses": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category": Database["public"]['Enums']["incident_category"],"context"?: string | null,"created_at"?: string,"declared_at"?: string,"department": string,"description": string,"direction": Database["public"]['Enums']["incident_direction"],"id"?: string,"is_demo"?: boolean,"location"?: string | null,"occurred_on": string,"outcome_note"?: string | null,"ref_code"?: string,"reporter_id": string,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["incident_status"],"subject_name": string,"title": string,"updated_at"?: string,"witnesses"?: string | null
+                  }
+                  Update: {
+                    "category"?: Database["public"]['Enums']["incident_category"],"context"?: string | null,"created_at"?: string,"declared_at"?: string,"department"?: string,"description"?: string,"direction"?: Database["public"]['Enums']["incident_direction"],"id"?: string,"is_demo"?: boolean,"location"?: string | null,"occurred_on"?: string,"outcome_note"?: string | null,"ref_code"?: string,"reporter_id"?: string,"reviewed_by"?: string | null,"status"?: Database["public"]['Enums']["incident_status"],"subject_name"?: string,"title"?: string,"updated_at"?: string,"witnesses"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "incidents_reporter_id_fkey"
+      columns: ["reporter_id"]
+isOneToOne: false
+      referencedRelation: "profile_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incidents_reporter_id_fkey"
+      columns: ["reporter_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incidents_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profile_cards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "incidents_reviewed_by_fkey"
+      columns: ["reviewed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"messages": {
                   Row: {
                     "author_id": string,"body": string,"channel_id": string,"created_at": string,"deleted_at": string | null,"edited_at": string | null,"id": string,"reply_to": string | null,"server_id": string,"shield_state": string
@@ -781,196 +883,6 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"report_attachments": {
-                  Row: {
-                    "created_at": string,"id": string,"purpose": string,"report_id": string,"storage_path": string,"uploaded_by": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "created_at"?: string,"id"?: string,"purpose"?: string,"report_id": string,"storage_path": string,"uploaded_by": string
-                  }
-                  Update: {
-                    "created_at"?: string,"id"?: string,"purpose"?: string,"report_id"?: string,"storage_path"?: string,"uploaded_by"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "report_attachments_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_attachments_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_attachments_uploaded_by_fkey"
-      columns: ["uploaded_by"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_attachments_uploaded_by_fkey"
-      columns: ["uploaded_by"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"report_confirmations": {
-                  Row: {
-                    "created_at": string,"report_id": string,"user_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "created_at"?: string,"report_id": string,"user_id": string
-                  }
-                  Update: {
-                    "created_at"?: string,"report_id"?: string,"user_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "report_confirmations_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_confirmations_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_confirmations_user_id_fkey"
-      columns: ["user_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_confirmations_user_id_fkey"
-      columns: ["user_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"report_locations": {
-                  Row: {
-                    "lat": number,"lng": number,"report_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "lat": number,"lng": number,"report_id": string
-                  }
-                  Update: {
-                    "lat"?: number,"lng"?: number,"report_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "report_locations_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: true
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_locations_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: true
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"report_updates": {
-                  Row: {
-                    "actor_id": string | null,"created_at": string,"from_status": Database["public"]['Enums']["pulse_status"] | null,"id": string,"is_internal": boolean,"kind": string,"note": string | null,"report_id": string,"to_status": Database["public"]['Enums']["pulse_status"] | null
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "actor_id"?: string | null,"created_at"?: string,"from_status"?: Database["public"]['Enums']["pulse_status"] | null,"id"?: string,"is_internal"?: boolean,"kind": string,"note"?: string | null,"report_id": string,"to_status"?: Database["public"]['Enums']["pulse_status"] | null
-                  }
-                  Update: {
-                    "actor_id"?: string | null,"created_at"?: string,"from_status"?: Database["public"]['Enums']["pulse_status"] | null,"id"?: string,"is_internal"?: boolean,"kind"?: string,"note"?: string | null,"report_id"?: string,"to_status"?: Database["public"]['Enums']["pulse_status"] | null
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "report_updates_actor_id_fkey"
-      columns: ["actor_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_updates_actor_id_fkey"
-      columns: ["actor_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_updates_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_updates_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"reports": {
-                  Row: {
-                    "alert_message": string | null,"approx_lat": number | null,"approx_lng": number | null,"assigned_to": string | null,"category": Database["public"]['Enums']["pulse_category"],"closed_reason": string | null,"confirmations_count": number,"created_at": string,"description": string,"duplicate_of": string | null,"expires_at": string | null,"id": string,"is_demo": boolean,"is_safety": boolean,"location_label": string,"priority": number,"ref_code": string,"reporter_id": string,"resolution_note": string | null,"severity": Database["public"]['Enums']["pulse_severity"],"status": Database["public"]['Enums']["pulse_status"],"subcategory": string | null,"title": string,"updated_at": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "alert_message"?: string | null,"approx_lat"?: number | null,"approx_lng"?: number | null,"assigned_to"?: string | null,"category": Database["public"]['Enums']["pulse_category"],"closed_reason"?: string | null,"confirmations_count"?: number,"created_at"?: string,"description": string,"duplicate_of"?: string | null,"expires_at"?: string | null,"id"?: string,"is_demo"?: boolean,"is_safety"?: boolean,"location_label": string,"priority"?: number,"ref_code"?: string,"reporter_id": string,"resolution_note"?: string | null,"severity"?: Database["public"]['Enums']["pulse_severity"],"status"?: Database["public"]['Enums']["pulse_status"],"subcategory"?: string | null,"title": string,"updated_at"?: string
-                  }
-                  Update: {
-                    "alert_message"?: string | null,"approx_lat"?: number | null,"approx_lng"?: number | null,"assigned_to"?: string | null,"category"?: Database["public"]['Enums']["pulse_category"],"closed_reason"?: string | null,"confirmations_count"?: number,"created_at"?: string,"description"?: string,"duplicate_of"?: string | null,"expires_at"?: string | null,"id"?: string,"is_demo"?: boolean,"is_safety"?: boolean,"location_label"?: string,"priority"?: number,"ref_code"?: string,"reporter_id"?: string,"resolution_note"?: string | null,"severity"?: Database["public"]['Enums']["pulse_severity"],"status"?: Database["public"]['Enums']["pulse_status"],"subcategory"?: string | null,"title"?: string,"updated_at"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "reports_assigned_to_fkey"
-      columns: ["assigned_to"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_assigned_to_fkey"
-      columns: ["assigned_to"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_duplicate_of_fkey"
-      columns: ["duplicate_of"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_duplicate_of_fkey"
-      columns: ["duplicate_of"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_reporter_id_fkey"
-      columns: ["reporter_id"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_reporter_id_fkey"
-      columns: ["reporter_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
                 },"research_applications": {
                   Row: {
                     "applicant_id": string,"availability": string | null,"created_at": string,"id": string,"project_id": string,"relevant_skills": (string)[],"reviewer_note": string | null,"statement": string,"status": Database["public"]['Enums']["application_status"],"updated_at": string
@@ -1024,38 +936,6 @@ isOneToOne: false
     },{
       foreignKeyName: "research_projects_lead_id_fkey"
       columns: ["lead_id"]
-isOneToOne: false
-      referencedRelation: "profiles"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"resources": {
-                  Row: {
-                    "course_code": string | null,"created_at": string,"department": string | null,"description": string | null,"id": string,"is_official": boolean,"kind": Database["public"]['Enums']["resource_kind"],"semester": number | null,"server_id": string | null,"source_label": string | null,"submitted_by": string | null,"tags": (string)[],"title": string,"url": string | null
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "course_code"?: string | null,"created_at"?: string,"department"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"kind": Database["public"]['Enums']["resource_kind"],"semester"?: number | null,"server_id"?: string | null,"source_label"?: string | null,"submitted_by"?: string | null,"tags"?: (string)[],"title": string,"url"?: string | null
-                  }
-                  Update: {
-                    "course_code"?: string | null,"created_at"?: string,"department"?: string | null,"description"?: string | null,"id"?: string,"is_official"?: boolean,"kind"?: Database["public"]['Enums']["resource_kind"],"semester"?: number | null,"server_id"?: string | null,"source_label"?: string | null,"submitted_by"?: string | null,"tags"?: (string)[],"title"?: string,"url"?: string | null
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "resources_server_id_fkey"
-      columns: ["server_id"]
-isOneToOne: false
-      referencedRelation: "servers"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "resources_submitted_by_fkey"
-      columns: ["submitted_by"]
-isOneToOne: false
-      referencedRelation: "profile_cards"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "resources_submitted_by_fkey"
-      columns: ["submitted_by"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -1336,7 +1216,21 @@ isOneToOne: false
                 }
           }
           Views: {
-            "my_moderation_notices": {
+            "incident_timeline": {
+                  Row: {
+                    "actor_label": string | null,"created_at": string | null,"id": string | null,"incident_id": string | null,"is_internal": boolean | null,"kind": string | null,"note": string | null,"to_status": Database["public"]['Enums']["incident_status"] | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "incident_updates_incident_id_fkey"
+      columns: ["incident_id"]
+isOneToOne: false
+      referencedRelation: "incidents"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"my_moderation_notices": {
                   Row: {
                     "appeal_resolution": string | null,"appeal_status": string | null,"category": Database["public"]['Enums']["shield_category"] | null,"content_excerpt": string | null,"content_id": string | null,"content_state": string | null,"content_type": Database["public"]['Enums']["shield_content"] | null,"created_at": string | null,"decision": Database["public"]['Enums']["shield_decision"] | null,"decision_reason": string | null,"id": string | null,"review_status": Database["public"]['Enums']["shield_case_status"] | null,"reviewed_at": string | null
                   }
@@ -1358,52 +1252,6 @@ isOneToOne: false
                         Relationships: [
                     
                   ]
-                },"pulse_feed": {
-                  Row: {
-                    "alert_message": string | null,"approx_lat": number | null,"approx_lng": number | null,"category": Database["public"]['Enums']["pulse_category"] | null,"closed_reason": string | null,"confirmations_count": number | null,"confirmed_by_me": boolean | null,"created_at": string | null,"description": string | null,"duplicate_of": string | null,"expires_at": string | null,"id": string | null,"is_active_warning": boolean | null,"is_demo": boolean | null,"is_mine": boolean | null,"is_safety": boolean | null,"location_label": string | null,"priority": number | null,"ref_code": string | null,"resolution_note": string | null,"severity": Database["public"]['Enums']["pulse_severity"] | null,"status": Database["public"]['Enums']["pulse_status"] | null,"subcategory": string | null,"title": string | null,"updated_at": string | null
-                  }
-                  ComputedFields: never
-                  Insert: {
-                           "alert_message"?: never,"approx_lat"?: number | null,"approx_lng"?: number | null,"category"?: Database["public"]['Enums']["pulse_category"] | null,"closed_reason"?: string | null,"confirmations_count"?: number | null,"confirmed_by_me"?: never,"created_at"?: string | null,"description"?: string | null,"duplicate_of"?: string | null,"expires_at"?: string | null,"id"?: string | null,"is_active_warning"?: never,"is_demo"?: boolean | null,"is_mine"?: never,"is_safety"?: boolean | null,"location_label"?: string | null,"priority"?: number | null,"ref_code"?: string | null,"resolution_note"?: string | null,"severity"?: Database["public"]['Enums']["pulse_severity"] | null,"status"?: Database["public"]['Enums']["pulse_status"] | null,"subcategory"?: string | null,"title"?: string | null,"updated_at"?: string | null
-                         }
-                        Update: {
-                           "alert_message"?: never,"approx_lat"?: number | null,"approx_lng"?: number | null,"category"?: Database["public"]['Enums']["pulse_category"] | null,"closed_reason"?: string | null,"confirmations_count"?: number | null,"confirmed_by_me"?: never,"created_at"?: string | null,"description"?: string | null,"duplicate_of"?: string | null,"expires_at"?: string | null,"id"?: string | null,"is_active_warning"?: never,"is_demo"?: boolean | null,"is_mine"?: never,"is_safety"?: boolean | null,"location_label"?: string | null,"priority"?: number | null,"ref_code"?: string | null,"resolution_note"?: string | null,"severity"?: Database["public"]['Enums']["pulse_severity"] | null,"status"?: Database["public"]['Enums']["pulse_status"] | null,"subcategory"?: string | null,"title"?: string | null,"updated_at"?: string | null
-                         }
-                        Relationships: [
-                    {
-      foreignKeyName: "reports_duplicate_of_fkey"
-      columns: ["duplicate_of"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "reports_duplicate_of_fkey"
-      columns: ["duplicate_of"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"pulse_timeline": {
-                  Row: {
-                    "actor_label": string | null,"created_at": string | null,"from_status": Database["public"]['Enums']["pulse_status"] | null,"id": string | null,"is_internal": boolean | null,"kind": string | null,"note": string | null,"report_id": string | null,"to_status": Database["public"]['Enums']["pulse_status"] | null
-                  }
-                  ComputedFields: never
-                  Relationships: [
-                    {
-      foreignKeyName: "report_updates_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "pulse_feed"
-      referencedColumns: ["id"]
-    },{
-      foreignKeyName: "report_updates_report_id_fkey"
-      columns: ["report_id"]
-isOneToOne: false
-      referencedRelation: "reports"
-      referencedColumns: ["id"]
-    }
-                  ]
                 }
           }
           Functions: {
@@ -1412,9 +1260,6 @@ isOneToOne: false
                            },
 "apply_to_project":
 { Args: { "p_availability": string,"p_skills": (string)[],"p_statement": string,"pid": string }; Returns: string
-                           },
-"approx_distance_m":
-{ Args: { "lat1": number,"lat2": number,"lng1": number,"lng2": number }; Returns: number
                            },
 "audit":
 { Args: { "p_action": string,"p_details"?: Json,"p_target_id": string,"p_target_type": string }; Returns: undefined
@@ -1425,8 +1270,8 @@ isOneToOne: false
 "can_read_server":
 { Args: { "sid": string }; Returns: boolean
                            },
-"can_see_report":
-{ Args: { "rid": string }; Returns: boolean
+"can_review_incident":
+{ Args: { "p_department": string }; Returns: boolean
                            },
 "can_view_profile":
 { Args: { "target": string }; Returns: boolean
@@ -1456,6 +1301,21 @@ isOneToOne: false
 "has_role":
 { Args: { "r": Database["public"]['Enums']["app_role"] }; Returns: boolean
                            },
+"incident_add_note":
+{ Args: { "p_id": string,"p_internal"?: boolean,"p_note": string }; Returns: undefined
+                           },
+"incident_can_transition":
+{ Args: { "from_s": Database["public"]['Enums']["incident_status"],"to_s": Database["public"]['Enums']["incident_status"] }; Returns: boolean
+                           },
+"incident_submit":
+{ Args: { "p_category": Database["public"]['Enums']["incident_category"],"p_context": string,"p_declaration": boolean,"p_department": string,"p_description": string,"p_location": string,"p_occurred_on": string,"p_subject_name": string,"p_title": string,"p_witnesses": string }; Returns: string
+                           },
+"incident_transition":
+{ Args: { "p_id": string,"p_note"?: string,"p_to": Database["public"]['Enums']["incident_status"] }; Returns: undefined
+                           },
+"incident_withdraw":
+{ Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -1477,9 +1337,6 @@ isOneToOne: false
 "is_posting_restricted":
 { Args: { "uid": string }; Returns: boolean
                            },
-"is_responder":
-{ Args: Record<PropertyKey, never>; Returns: boolean
-                           },
 "is_server_member":
 { Args: { "sid": string }; Returns: boolean
                            },
@@ -1492,11 +1349,6 @@ isOneToOne: false
 "join_public_server":
 { Args: { "sid": string }; Returns: undefined
                            },
-"list_responders":
-{ Args: Record<PropertyKey, never>; Returns: {
-              "full_name": string,"id": string
-            }[]
-                           },
 "mod_resolve_report":
 { Args: { "p_id": string,"p_note"?: string,"p_remove_content"?: boolean,"p_status": string }; Returns: undefined
                            },
@@ -1505,38 +1357,6 @@ isOneToOne: false
                            },
 "notify":
 { Args: { "p_body"?: string,"p_link"?: string,"p_title": string,"p_type": string,"p_user": string }; Returns: undefined
-                           },
-"pulse_add_note":
-{ Args: { "p_internal"?: boolean,"p_note": string,"rid": string }; Returns: undefined
-                           },
-"pulse_can_transition":
-{ Args: { "from_s": Database["public"]['Enums']["pulse_status"],"to_s": Database["public"]['Enums']["pulse_status"] }; Returns: boolean
-                           },
-"pulse_confirm":
-{ Args: { "rid": string }; Returns: undefined
-                           },
-"pulse_expire_stale":
-{ Args: Record<PropertyKey, never>; Returns: number
-                           },
-"pulse_find_similar":
-{ Args: { "p_category": Database["public"]['Enums']["pulse_category"],"p_lat": number,"p_lng": number }; Returns: {
-              "created_at": string,"distance_m": number,"id": string,"location_label": string,"ref_code": string,"status": Database["public"]['Enums']["pulse_status"],"title": string
-            }[]
-                           },
-"pulse_issue_alert":
-{ Args: { "p_hours"?: number,"p_message": string,"rid": string }; Returns: number
-                           },
-"pulse_mark_duplicate":
-{ Args: { "p_of": string,"rid": string }; Returns: undefined
-                           },
-"pulse_priority":
-{ Args: { "cat": Database["public"]['Enums']["pulse_category"],"sev": Database["public"]['Enums']["pulse_severity"] }; Returns: number
-                           },
-"pulse_submit":
-{ Args: { "p_category": Database["public"]['Enums']["pulse_category"],"p_description": string,"p_lat": number,"p_lng": number,"p_location_label": string,"p_severity": Database["public"]['Enums']["pulse_severity"],"p_subcategory": string,"p_title": string }; Returns: string
-                           },
-"pulse_transition":
-{ Args: { "p_assignee"?: string,"p_note"?: string,"p_to": Database["public"]['Enums']["pulse_status"],"rid": string }; Returns: undefined
                            },
 "redact_sensitive":
 { Args: { "t": string }; Returns: string
@@ -1642,13 +1462,10 @@ isOneToOne: false
                            },
 "withdraw_application":
 { Args: { "aid": string }; Returns: undefined
-                           },
-"within_campus":
-{ Args: { "lat": number,"lng": number }; Returns: boolean
                            }
           }
           Enums: {
-            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"safety_responder"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","membership_policy": "open"|"approval","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","pulse_category": "water_sanitation"|"electricity_lighting"|"wifi_network"|"maintenance_infrastructure"|"waste_management"|"wildlife"|"safety_hazard"|"other","pulse_severity": "low"|"medium"|"high"|"critical","pulse_status": "submitted"|"under_review"|"verified"|"assigned"|"in_progress"|"resolved"|"rejected"|"closed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","resource_kind": "course"|"elective"|"material"|"link"|"form","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
+            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"incident_reviewer"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","incident_category": "harassment"|"sexual_harassment"|"verbal_abuse"|"discrimination"|"threat_or_violence"|"unprofessional_conduct"|"academic_misconduct"|"other","incident_direction": "about_staff"|"about_student","incident_status": "submitted"|"under_review"|"action_taken"|"unsubstantiated"|"false_report"|"withdrawn","membership_policy": "open"|"approval","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1764,7 +1581,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "safety_responder", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"membership_policy": ["open", "approval"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"pulse_category": ["water_sanitation", "electricity_lighting", "wifi_network", "maintenance_infrastructure", "waste_management", "wildlife", "safety_hazard", "other"],"pulse_severity": ["low", "medium", "high", "critical"],"pulse_status": ["submitted", "under_review", "verified", "assigned", "in_progress", "resolved", "rejected", "closed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"resource_kind": ["course", "elective", "material", "link", "form"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
+            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "incident_reviewer", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"incident_category": ["harassment", "sexual_harassment", "verbal_abuse", "discrimination", "threat_or_violence", "unprofessional_conduct", "academic_misconduct", "other"],"incident_direction": ["about_staff", "about_student"],"incident_status": ["submitted", "under_review", "action_taken", "unsubstantiated", "false_report", "withdrawn"],"membership_policy": ["open", "approval"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
           }
         }
 } as const

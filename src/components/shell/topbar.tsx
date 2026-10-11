@@ -32,8 +32,8 @@ export function Topbar({
         />
       </form>
       <div className="ml-auto flex items-center gap-1.5">
-        <Link href="/pulse/new" className="hidden h-9 items-center rounded-lg border border-destructive/30 bg-destructive/10 px-3 text-sm font-medium text-destructive hover:bg-destructive/20 md:inline-flex">
-          Report an issue
+        <Link href="/incidents/new" className="hidden h-9 items-center rounded-lg border border-destructive/30 bg-destructive/10 px-3 text-sm font-medium text-destructive hover:bg-destructive/20 md:inline-flex">
+          Report an incident
         </Link>
         <NotificationBell userId={userId} initialUnread={unread} />
         <UserMenu profile={profile} />

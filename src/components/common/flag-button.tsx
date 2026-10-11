@@ -11,7 +11,7 @@ import { selectClass } from "@/components/common/form-field";
 import { flagContent } from "@/lib/actions/social";
 import { REPORT_CATEGORIES, type ReportCategory } from "@/lib/shield/types";
 
-type Target = "post" | "comment" | "message" | "direct_message" | "server" | "profile" | "pulse_report" | "resource";
+type Target = "post" | "comment" | "message" | "direct_message" | "server" | "profile";
 const CONTENT_TARGETS: Target[] = ["post", "comment", "message", "direct_message"];
 
 /** "Report to moderators" control used across modules. Content reports feed CampusShield. */

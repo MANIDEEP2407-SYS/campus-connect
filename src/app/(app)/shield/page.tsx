@@ -9,7 +9,7 @@ import { ToneBadge } from "@/components/common/tone-badge";
 import { TimeAgo } from "@/components/common/time-ago";
 import { selectClass } from "@/components/common/form-field";
 import { ActionButton } from "@/components/common/action-button";
-import { LiveRefresh } from "@/components/pulse/live-refresh";
+import { LiveRefresh } from "@/components/common/live-refresh";
 import { Button } from "@/components/ui/button";
 import { runPendingScans } from "@/lib/actions/shield";
 import { moderationProviderStatus } from "@/lib/shield/service";

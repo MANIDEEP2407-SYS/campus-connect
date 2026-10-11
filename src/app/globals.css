@@ -110,30 +110,3 @@
   }
 }
 
-/* Leaflet: harmonise popups/controls with the dark theme. */
-.leaflet-container {
-  background: var(--muted);
-  font: inherit;
-  border-radius: var(--radius-lg);
-}
-/* Dark basemap: invert OSM tiles rather than depending on a third-party dark tile service. */
-.leaflet-tile-pane {
-  filter: invert(1) hue-rotate(185deg) brightness(0.85) contrast(0.9) saturate(0.6);
-}
-.leaflet-popup-content-wrapper,
-.leaflet-popup-tip {
-  background: var(--popover);
-  color: var(--popover-foreground);
-}
-.leaflet-bar a {
-  background: var(--popover) !important;
-  color: var(--popover-foreground) !important;
-  border-color: var(--border) !important;
-}
-.leaflet-control-attribution {
-  background: color-mix(in oklch, var(--background), transparent 30%) !important;
-  color: var(--muted-foreground) !important;
-}
-.leaflet-control-attribution a {
-  color: var(--primary) !important;
-}

@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 import { NAV_ITEMS, STAFF_ITEMS, isActive } from "@/components/shell/nav-items";
 import { Logo } from "@/components/shell/logo";
 
-export function AppSidebar({ isResponder, isModerator, unreadMessages }: { isResponder: boolean; isModerator: boolean; unreadMessages: number }) {
+export function AppSidebar({ isReviewer, isModerator, unreadMessages }: { isReviewer: boolean; isModerator: boolean; unreadMessages: number }) {
   const pathname = usePathname();
-  const staff = [isResponder && STAFF_ITEMS.responder, isModerator && STAFF_ITEMS.shield, isModerator && STAFF_ITEMS.admin].filter(Boolean) as (typeof STAFF_ITEMS)[keyof typeof STAFF_ITEMS][];
+  const staff = [isReviewer && STAFF_ITEMS.reviewer, isModerator && STAFF_ITEMS.shield, isModerator && STAFF_ITEMS.admin].filter(Boolean) as (typeof STAFF_ITEMS)[keyof typeof STAFF_ITEMS][];
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
       <div className="flex h-16 items-center px-5">

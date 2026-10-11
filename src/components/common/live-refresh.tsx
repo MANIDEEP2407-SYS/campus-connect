@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 /** Re-render the current server page when rows in `table` change (Realtime respects RLS). */
-export function LiveRefresh({ table }: { table: "reports" | "moderation_cases" }) {
+export function LiveRefresh({ table }: { table: "incidents" | "moderation_cases" }) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {

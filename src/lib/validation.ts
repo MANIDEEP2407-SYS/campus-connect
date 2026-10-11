@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PULSE_CATEGORIES, PULSE_SEVERITIES } from "@/lib/pulse";
+import { INCIDENT_CATEGORIES } from "@/lib/incidents";
 
 // Shared by client forms (react-hook-form + zodResolver) and server actions (re-validation).
 
@@ -129,32 +129,22 @@ export const applicationSchema = z.object({
   availability: optionalText(120),
 });
 
-export const resourceSchema = z.object({
-  kind: z.enum(["course", "elective", "material", "link", "form"]),
-  title: z.string().trim().min(3).max(160),
-  description: optionalText(2000),
-  course_code: optionalText(20),
-  department: optionalText(80),
-  url: z.union([z.url({ protocol: /^https?$/ }), z.literal(""), z.null()]).optional().transform((v) => v || null),
-  source_label: optionalText(120),
-  tags: tags(10),
-});
-
-export const pulseReportSchema = z.object({
-  category: z.enum(PULSE_CATEGORIES),
-  subcategory: optionalText(60),
+export const incidentSchema = z.object({
+  category: z.enum(INCIDENT_CATEGORIES),
+  subject_name: z.string().trim().min(2, "Who is this about?").max(120),
+  department: z.string().trim().min(2, "Choose the department").max(80),
   title: z.string().trim().min(5, "At least 5 characters").max(120),
-  description: z.string().trim().min(10, "Describe the issue (10+ characters)").max(2000),
-  severity: z.enum(PULSE_SEVERITIES),
-  location_label: z.string().trim().min(2, "Where is it?").max(120),
-  lat: z.number().min(10.88).max(10.93).nullable(),
-  lng: z.number().min(76.88).max(76.93).nullable(),
-  force: z.boolean().optional(),
+  description: z.string().trim().min(30, "Describe what happened (30+ characters)").max(4000),
+  occurred_on: z.iso.date("Choose the date"),
+  location: optionalText(120),
+  context: optionalText(120),
+  witnesses: optionalText(500),
+  declaration: z.literal(true, "You must confirm the declaration"),
 });
-export type PulseReportInput = z.input<typeof pulseReportSchema>;
+export type IncidentInput = z.input<typeof incidentSchema>;
 
 export const flagSchema = z.object({
-  target_type: z.enum(["post", "comment", "message", "direct_message", "server", "profile", "pulse_report", "resource"]),
+  target_type: z.enum(["post", "comment", "message", "direct_message", "server", "profile"]),
   target_id: z.uuid(),
   category: z.enum(["harassment", "threat", "hate", "sexual_harassment", "personal_info", "self_harm", "spam", "other"]).optional(),
   reason: z.string().trim().min(5, "Tell moderators what's wrong").max(1000),

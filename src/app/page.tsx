@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, CalendarDays, Compass, FlaskConical, MessagesSquare, ShieldCheck, Siren, Users } from "lucide-react";
+import { CalendarDays, Compass, FileWarning, FlaskConical, MessagesSquare, ShieldCheck, Users } from "lucide-react";
 import { Logo } from "@/components/shell/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { LANDING_PHOTOS, unsplash } from "@/lib/photos";
@@ -10,10 +10,9 @@ const FEATURES = [
   { icon: Compass, title: "Discover people", body: "Find collaborators across disciplines by interests, skills and goals — with transparent matching." },
   { icon: CalendarDays, title: "Clubs & events", body: "Verified official clubs, event registration with capacity limits and reminders." },
   { icon: FlaskConical, title: "Research exchange", body: "Faculty post projects; students apply and track decisions in one place." },
-  { icon: Siren, title: "CampusPulse", body: "Report utility failures, hazards and wildlife sightings with a traceable response workflow." },
-  { icon: BookOpen, title: "Academic resources", body: "Curated links and course communities, with official and student material clearly labelled." },
+  { icon: FileWarning, title: "Incident reports", body: "Students and teachers confidentially report misconduct to the department concerned, with a reviewed, traceable outcome." },
   { icon: ShieldCheck, title: "CampusShield", body: "AI-assisted moderation that flags harmful content for human review — people decide, not the model." },
-  { icon: Users, title: "Built for one campus", body: "Designed around the Coimbatore campus, with role-based access for responders and moderators." },
+  { icon: Users, title: "Built for one campus", body: "Designed around the Coimbatore campus, with role-based access for department reviewers and moderators." },
 ];
 
 const CAMPUS_LIFE = [
@@ -50,7 +49,7 @@ export default function Landing() {
               One Campus. Every Connection. <span className="text-primary">Every Opportunity.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base text-pretty text-muted-foreground md:text-lg">
-              CampusConnect brings communities, clubs, research, academic resources and campus issue reporting into one connected platform for students, faculty and campus teams.
+              CampusConnect brings communities, clubs, research and confidential incident reporting into one connected platform for students, faculty and campus teams.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "h-10 px-5")}>Create an account</Link>
@@ -89,7 +88,7 @@ export default function Landing() {
 
         <p className="mt-16 max-w-3xl text-xs leading-relaxed text-muted-foreground">
           This is an independent hackathon prototype. It is not an official university system, does not integrate with university identity or records, and
-          all demo people, clubs, events and incident reports are fictional. CampusPulse is not an emergency service. Illustrative stock photos from{" "}
+          all demo people, clubs, events and incident reports are fictional. Incident reports are not an emergency service. Illustrative stock photos from{" "}
           <a href="https://unsplash.com" className="underline hover:text-foreground" rel="noreferrer" target="_blank">Unsplash</a> by {credits}.
         </p>
       </main>

@@ -7,7 +7,7 @@ import { withViewer } from "@/lib/actions/safe";
 
 export async function setUserRole(input: unknown) {
   return withViewer(
-    z.object({ userId: z.uuid(), role: z.enum(["platform_admin", "safety_responder", "moderator", "faculty"]), grant: z.boolean() }),
+    z.object({ userId: z.uuid(), role: z.enum(["platform_admin", "incident_reviewer", "moderator", "faculty"]), grant: z.boolean() }),
     input,
     async (v, d) => {
       // Authorisation is enforced inside admin_set_role (platform_admin only).
@@ -35,13 +35,4 @@ export async function resolveModerationReport(input: unknown) {
       return ok(null, d.status === "dismissed" ? "Report dismissed" : d.removeContent ? "Content removed" : "Marked as actioned");
     },
   );
-}
-
-export async function runMaintenance(input: unknown) {
-  return withViewer(z.object({}), input, async (v) => {
-    if (!v.isModerator && !v.isResponder) return fromPg({ message: "Not allowed", code: "P0001" });
-    const pulse = await v.supabase.rpc("pulse_expire_stale");
-    refresh();
-    return ok(null, `Expired ${pulse.data ?? 0} stale warnings`);
-  });
 }

@@ -9,13 +9,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { MOBILE_PRIMARY, NAV_ITEMS, STAFF_ITEMS, isActive } from "@/components/shell/nav-items";
 import { Logo } from "@/components/shell/logo";
 
-export function MobileNav({ isResponder, isModerator }: { isResponder: boolean; isModerator: boolean }) {
+export function MobileNav({ isReviewer, isModerator }: { isReviewer: boolean; isModerator: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const primary = NAV_ITEMS.filter((i) => (MOBILE_PRIMARY as readonly string[]).includes(i.href));
   const all = [
     ...NAV_ITEMS,
-    ...(isResponder ? [STAFF_ITEMS.responder] : []),
+    ...(isReviewer ? [STAFF_ITEMS.reviewer] : []),
     ...(isModerator ? [STAFF_ITEMS.shield, STAFF_ITEMS.admin] : []),
   ];
   return (

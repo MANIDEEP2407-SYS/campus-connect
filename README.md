@@ -1,11 +1,11 @@
 # CampusConnect Amrita
 
 **One Campus. Every Connection. Every Opportunity.**
-A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vidyapeetham, Coimbatore — communities with realtime chat, social feed, people discovery, clubs & events, research & consultancy, academic resources, **CampusPulse** issue reporting, **Amrita Microsoft 365 sign-in** and **CampusShield** AI-assisted moderation.
+A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vidyapeetham, Coimbatore — communities with realtime chat, social feed, people discovery, clubs & events, research & consultancy, confidential **incident reports**, **Amrita Microsoft 365 sign-in** and **CampusShield** AI-assisted moderation.
 
 **Live demo:** https://campus-connect-nu-nine.vercel.app
 
-> Prototype. Not an official university system. All demo people, clubs, events, incidents and listings are **fictional**. CampusPulse is not an emergency service.
+> Prototype. Not an official university system. All demo people, clubs, events, incidents and listings are **fictional**. Incident reports are not an emergency service.
 >
 > The hosted demo uses development sign-in (Microsoft sign-in awaits university configuration) and the development moderation mock (no AI key configured). Hosted demo accounts use a private password, not the one in `.env.example`.
 
@@ -14,7 +14,7 @@ A unified collaboration and smart-campus platform prototype for Amrita Vishwa Vi
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router, Cache Components, `proxy.ts`), React 19, TypeScript (strict) |
-| UI | Tailwind CSS v4, shadcn/ui on Base UI, Lucide icons, Sonner, Leaflet + OpenStreetMap |
+| UI | Tailwind CSS v4, shadcn/ui on Base UI, Lucide icons, Sonner |
 | Forms | React Hook Form + Zod 4 (same schemas validate on client and in server actions) |
 | Backend | Supabase — PostgreSQL with Row Level Security, Auth, Storage, Realtime |
 | Auth | Supabase Auth: Microsoft Entra ID (OIDC + PKCE) for production, email/password for development |
@@ -50,7 +50,7 @@ All on `@demo.campusconnect.test`, password = `DEMO_PASSWORD` from `.env.local` 
 | `fatima`, `divya` | Postgraduates |
 | `karthik` | Doctoral scholar (can publish research) |
 | `anand`, `priya` | Verified faculty |
-| `security`, `maintenance` | CampusPulse safety responders |
+| `security`, `maintenance` | Incident reviewers — `security` is the central grievance cell (Administration, sees all departments), `maintenance` reviews Computer Science & Engineering |
 | `moderator` | Safety moderator (CampusShield) |
 | `admin` | Platform admin (roles, verification, audit log) |
 
@@ -75,8 +75,7 @@ All on `@demo.campusconnect.test`, password = `DEMO_PASSWORD` from `.env.local` 
 - **Direct messages** — private realtime conversations.
 - **Clubs & events** — official vs student clubs, membership approval, events with capacity-safe registration, reminders, cover photos.
 - **Research & consultancy** — listings, applications and decisions; restricted budget details.
-- **Academic resources** — official vs student-contributed material and course communities.
-- **CampusPulse** — issue and safety reports with map, duplicate detection, responder desk, enforced status lifecycle, campus alerts; reporters stay anonymous publicly.
+- **Incident reports** — students report incidents involving teachers/staff during classes or official work, and teachers report incidents involving students. Reports are confidential, routed to reviewers of the department concerned (plus the central Administration cell), and require a truthfulness declaration: allegations found to be knowingly false may lead to disciplinary action against the reporter. Reviewers record an outcome (action taken, not substantiated, or found false); every step is audited and the reporter is notified.
 - **CampusShield** — AI-assisted moderation queue for posts, comments and community messages (see below).
 
 ## Microsoft sign-in (Amrita Microsoft 365)
