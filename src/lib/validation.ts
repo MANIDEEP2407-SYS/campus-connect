@@ -131,6 +131,7 @@ export const applicationSchema = z.object({
 
 export const incidentSchema = z.object({
   category: z.enum(INCIDENT_CATEGORIES),
+  subject_kind: z.enum(["staff", "student"]),
   subject_name: z.string().trim().min(2, "Who is this about?").max(120),
   department: z.string().trim().min(2, "Choose the department").max(80),
   title: z.string().trim().min(5, "At least 5 characters").max(120),

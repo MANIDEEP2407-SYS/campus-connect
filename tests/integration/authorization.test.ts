@@ -139,9 +139,10 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
 
   describe("incident reports", () => {
     let incidentId: string;
-    const submit = (c: Client, dept: string, declaration = true) =>
+    type Category = Database["public"]["Enums"]["incident_category"];
+    const submit = (c: Client, dept: string, declaration = true, kind: "staff" | "student" = "staff", category: Category = "unprofessional_conduct") =>
       c.rpc("incident_submit", {
-        p_category: "unprofessional_conduct", p_subject_name: "Test subject", p_department: dept, p_title: `Integration test ${Date.now()}`,
+        p_category: category, p_subject_kind: kind, p_subject_name: "Test subject", p_department: dept, p_title: `Integration test ${Date.now()}`,
         p_description: "Integration test: a description that is comfortably longer than thirty characters.", p_occurred_on: new Date().toISOString().slice(0, 10),
         p_location: "", p_context: "", p_witnesses: "", p_declaration: declaration,
       });
@@ -165,11 +166,20 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
       expect(notes).toHaveLength(1);
     });
 
-    it("faculty reports are recorded as about a student", async () => {
-      const { data, error } = await submit(clients.priya!, "Biomedical Engineering");
+    it("faculty report students (including idea theft), never staff", async () => {
+      expect((await submit(clients.priya!, "Biomedical Engineering", true, "staff")).error?.message).toMatch(/students only/i);
+      const { data, error } = await submit(clients.priya!, "Biomedical Engineering", true, "student", "idea_theft");
       expect(error).toBeNull();
-      const { data: row } = await clients.priya!.from("incidents").select("direction").eq("id", data as string).single();
-      expect(row!.direction).toBe("about_student");
+      const { data: row } = await clients.priya!.from("incidents").select("direction, category").eq("id", data as string).single();
+      expect(row).toMatchObject({ direction: "about_student", category: "idea_theft" });
+    });
+
+    it("students report other students only for plagiarism or work theft", async () => {
+      expect((await submit(clients.rahul!, "Mechanical Engineering", true, "student", "verbal_abuse")).error?.message).toMatch(/plagiarism/i);
+      const { data, error } = await submit(clients.rahul!, "Mechanical Engineering", true, "student", "plagiarism");
+      expect(error).toBeNull();
+      const { data: row } = await clients.rahul!.from("incidents").select("direction").eq("id", data as string).single();
+      expect(row!.direction).toBe("about_peer");
     });
 
     it("reporters and other users cannot change the status", async () => {

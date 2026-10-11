@@ -20,7 +20,7 @@ const cases: [string, z.ZodType, unknown][] = [
   ["event", eventSchema, { title: "Workshop", description: "", category: "Workshop", venue: "AB2", starts_at: `${day}T10:30:00.000Z`, ends_at: `${day}T12:30:00.000Z`, capacity: "", registration_deadline: "", club_id: "", cover_url: "" }],
   ["project", projectSchema, { kind: "research", title: "A research project", abstract: "An abstract that is long enough to pass.", description: "", area: "Other", department: "", required_skills: [], commitment: "4 hrs/week", positions: "2", budget_note: "" }],
   ["application", applicationSchema, { project_id: UUID, statement: "I would like to join because I have relevant experience.", relevant_skills: [], availability: "" }],
-  ["incident", incidentSchema, { category: "other", subject_name: "A teacher", department: "Mathematics", title: "Incident in class", description: "A description of what happened that is long enough.", occurred_on: day, location: "", context: "", witnesses: "", declaration: true }],
+  ["incident", incidentSchema, { category: "other", subject_kind: "staff", subject_name: "A teacher", department: "Mathematics", title: "Incident in class", description: "A description of what happened that is long enough.", occurred_on: day, location: "", context: "", witnesses: "", declaration: true }],
   ["post", postSchema, { body: "Hello", image_path: null, club_id: null, is_announcement: false }],
 ];
 

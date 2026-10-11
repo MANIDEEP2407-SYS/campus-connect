@@ -12,6 +12,7 @@ export async function submitIncident(input: unknown) {
   return withViewer(incidentSchema.extend({ attachmentPaths: z.array(z.string().max(300)).max(3).default([]) }), input, async (v, d) => {
     const { data: id, error } = await v.supabase.rpc("incident_submit", {
       p_category: d.category,
+      p_subject_kind: d.subject_kind,
       p_subject_name: d.subject_name,
       p_department: d.department,
       p_title: d.title,

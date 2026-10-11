@@ -6,11 +6,15 @@ export type IncidentStatus = (typeof INCIDENT_STATUSES)[number];
 
 export const INCIDENT_CATEGORIES = [
   "harassment", "sexual_harassment", "verbal_abuse", "discrimination", "threat_or_violence",
-  "unprofessional_conduct", "academic_misconduct", "other",
+  "unprofessional_conduct", "plagiarism", "idea_theft", "academic_misconduct", "other",
 ] as const;
 export type IncidentCategory = (typeof INCIDENT_CATEGORIES)[number];
 
-export type IncidentDirection = "about_staff" | "about_student";
+export type IncidentDirection = "about_staff" | "about_student" | "about_peer";
+export type SubjectKind = "staff" | "student";
+
+/** Students reporting other students may only use these — mirrors incidents_peer_category_check. */
+export const PEER_CATEGORIES = ["plagiarism", "idea_theft"] as const satisfies readonly IncidentCategory[];
 
 export const TRANSITIONS: Record<IncidentStatus, readonly IncidentStatus[]> = {
   submitted: ["under_review", "action_taken", "unsubstantiated", "false_report"],
@@ -34,14 +38,29 @@ export function isOpen(s: IncidentStatus) {
   return s === "submitted" || s === "under_review";
 }
 
-/** Faculty and staff report students; everyone else reports teachers/staff. */
-export function directionFor(affiliation: string): IncidentDirection {
-  return affiliation === "faculty" || affiliation === "staff" ? "about_student" : "about_staff";
+export function isStaffAffiliation(affiliation: string) {
+  return affiliation === "faculty" || affiliation === "staff";
+}
+
+/** Teachers/staff report students; students report teachers/staff or (for work theft) other students. */
+export function subjectKindsFor(affiliation: string): readonly SubjectKind[] {
+  return isStaffAffiliation(affiliation) ? ["student"] : ["staff", "student"];
+}
+
+/** Mirrors incident_submit(): the direction follows from the reporter and who is reported. */
+export function directionFor(affiliation: string, subject: SubjectKind): IncidentDirection {
+  if (isStaffAffiliation(affiliation)) return "about_student";
+  return subject === "staff" ? "about_staff" : "about_peer";
+}
+
+export function categoriesFor(direction: IncidentDirection): readonly IncidentCategory[] {
+  return direction === "about_peer" ? PEER_CATEGORIES : INCIDENT_CATEGORIES;
 }
 
 export const DIRECTION_META: Record<IncidentDirection, { label: string; subject: string; department: string }> = {
   about_staff: { label: "Student → teacher/staff", subject: "Teacher or staff member involved", department: "Their department" },
   about_student: { label: "Teacher → student", subject: "Student involved", department: "Student's department" },
+  about_peer: { label: "Student → student", subject: "Student involved", department: "Student's department" },
 };
 
 export const CATEGORY_META: Record<IncidentCategory, { label: string; hint: string }> = {
@@ -51,7 +70,9 @@ export const CATEGORY_META: Record<IncidentCategory, { label: string; hint: stri
   discrimination: { label: "Discrimination", hint: "Unfair treatment based on identity or background" },
   threat_or_violence: { label: "Threat or violence", hint: "Threats, physical aggression or damage" },
   unprofessional_conduct: { label: "Unprofessional conduct", hint: "Misconduct during class, labs or official work" },
-  academic_misconduct: { label: "Academic misconduct", hint: "Unfair assessment, cheating or plagiarism" },
+  plagiarism: { label: "Plagiarism", hint: "Copied work, code or writing submitted without credit" },
+  idea_theft: { label: "Idea or work theft", hint: "Took an idea, project or work and presented it as their own, e.g. to another teacher" },
+  academic_misconduct: { label: "Academic misconduct", hint: "Unfair assessment, cheating in exams or other dishonesty" },
   other: { label: "Other incident", hint: "Anything else the department should review" },
 };
 

@@ -29,7 +29,7 @@ describe("Validation schemas", () => {
   });
 
   it("requires the truthfulness declaration and a real date on incident reports", () => {
-    const base = { category: "verbal_abuse", subject_name: "Lab instructor", department: "Physics", title: "Shouting in lab", description: "The instructor shouted insults at the batch during the lab session.", occurred_on: "2026-10-10" };
+    const base = { category: "verbal_abuse", subject_kind: "staff", subject_name: "Lab instructor", department: "Physics", title: "Shouting in lab", description: "The instructor shouted insults at the batch during the lab session.", occurred_on: "2026-10-10" };
     expect(incidentSchema.safeParse({ ...base, declaration: true }).success).toBe(true);
     expect(incidentSchema.safeParse({ ...base, declaration: false }).success).toBe(false);
     expect(incidentSchema.safeParse({ ...base, declaration: true, occurred_on: "yesterday" }).success).toBe(false);

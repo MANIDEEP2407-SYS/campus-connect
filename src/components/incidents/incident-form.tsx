@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -15,26 +15,36 @@ import { ImageUpload } from "@/components/common/image-upload";
 import { IncidentDisclaimer } from "@/components/incidents/incident-badges";
 import { submitIncident } from "@/lib/actions/incidents";
 import { incidentSchema } from "@/lib/validation";
-import { CATEGORY_META, DECLARATION, DIRECTION_META, INCIDENT_CATEGORIES, type IncidentDirection } from "@/lib/incidents";
+import { CATEGORY_META, DECLARATION, DIRECTION_META, categoriesFor, directionFor, subjectKindsFor, type SubjectKind } from "@/lib/incidents";
 import { CAMPUS_LOCATIONS, DEPARTMENTS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 type Values = z.input<typeof incidentSchema>;
 
-export function IncidentForm({ userId, direction, defaultDepartment }: { userId: string; direction: IncidentDirection; defaultDepartment: string | null }) {
+const SUBJECT_OPTIONS: Record<SubjectKind, { label: string; hint: string }> = {
+  staff: { label: "A teacher or staff member", hint: "Any incident during classes, labs or official work" },
+  student: { label: "Another student", hint: "Only plagiarism or stealing your work" },
+};
+
+export function IncidentForm({ userId, affiliation, defaultDepartment }: { userId: string; affiliation: string; defaultDepartment: string | null }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [photos, setPhotos] = useState<string[]>([]);
-  const meta = DIRECTION_META[direction];
+  const kinds = subjectKindsFor(affiliation);
   const today = new Date().toISOString().slice(0, 10);
   const form = useForm<Values, unknown, z.output<typeof incidentSchema>>({
     resolver: zodResolver(incidentSchema),
     defaultValues: {
-      category: "unprofessional_conduct", subject_name: "", department: defaultDepartment ?? "", title: "", description: "",
+      category: kinds[0] === "student" ? "idea_theft" : "unprofessional_conduct", subject_kind: kinds[0], subject_name: "",
+      department: defaultDepartment ?? "", title: "", description: "",
       occurred_on: today, location: "", context: "", witnesses: "", declaration: false as unknown as true,
     },
   });
   const { errors } = form.formState;
+  const subjectKind = useWatch({ control: form.control, name: "subject_kind" });
+  const direction = directionFor(affiliation, subjectKind);
+  const categories = categoriesFor(direction);
+  const meta = DIRECTION_META[direction];
 
   const submit = (values: z.output<typeof incidentSchema>) =>
     start(async () => {
@@ -46,14 +56,49 @@ export function IncidentForm({ userId, direction, defaultDepartment }: { userId:
 
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)} className="space-y-6">
+      {kinds.length > 1 && (
+        <fieldset className="rounded-xl border bg-card p-5">
+          <legend className="px-1 text-sm font-semibold">Who is this about?</legend>
+          <Controller
+            control={form.control}
+            name="subject_kind"
+            render={({ field }) => (
+              <div className="mt-2 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Who is this about?">
+                {kinds.map((k) => (
+                  <label key={k} className={cn("flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 text-sm has-focus-visible:ring-3 has-focus-visible:ring-ring/50", field.value === k && "border-primary bg-primary/5")}>
+                    <input
+                      type="radio"
+                      name="subject_kind"
+                      value={k}
+                      checked={field.value === k}
+                      onChange={() => {
+                        field.onChange(k);
+                        const allowed = categoriesFor(directionFor(affiliation, k));
+                        if (!allowed.includes(form.getValues("category"))) form.setValue("category", allowed[0]!);
+                      }}
+                      className="sr-only"
+                    />
+                    <span className="font-medium">{SUBJECT_OPTIONS[k].label}</span>
+                    <span className="text-xs text-muted-foreground">{SUBJECT_OPTIONS[k].hint}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          />
+        </fieldset>
+      )}
+
       <fieldset className="rounded-xl border bg-card p-5">
         <legend className="px-1 text-sm font-semibold">What kind of incident?</legend>
+        {direction === "about_peer" && (
+          <p className="mt-1 text-xs text-muted-foreground">Between students, only plagiarism and stealing work can be reported here.</p>
+        )}
         <Controller
           control={form.control}
           name="category"
           render={({ field }) => (
             <div className="mt-2 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Category">
-              {INCIDENT_CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <label key={c} className={cn("flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 text-sm has-focus-visible:ring-3 has-focus-visible:ring-ring/50", field.value === c && "border-primary bg-primary/5")}>
                   <input type="radio" name="category" value={c} checked={field.value === c} onChange={() => field.onChange(c)} className="sr-only" />
                   <span className="font-medium">{CATEGORY_META[c].label}</span>
