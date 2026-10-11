@@ -86,13 +86,29 @@ export class OpenAIModerationProvider implements ModerationProvider {
 // ---------------------------------------------------------------------------
 // Development mock (deterministic keyword heuristic — NOT AI)
 // ---------------------------------------------------------------------------
-const MOCK_LEXICON: { key: keyof ProviderScores; patterns: RegExp[] }[] = [
-  { key: "harassment", patterns: [/\b(idiot|loser|stupid|worthless|pathetic|ugly|freak|nobody likes you|everyone hates you|shut up)\b/i] },
-  { key: "harassment/threatening", patterns: [/\b(i('| wi)ll (hurt|beat|find|get) you|watch your back|you('| wi)ll regret|kill you|beat you up)\b/i] },
+// "you" as commonly typed in chat ("u", "ya", "yu").
+const YOU = String.raw`(?:you|u|ya|yu)`;
+// Stated intent: "I will", "I'll", "ill", "I'm gonna", "going to", "imma", "will"…
+const INTENT = String.raw`(?:i ?(?:'|’)?ll|i will|i ?(?:'|’)?m (?:gonna|going to)|i am (?:gonna|going to)|gonna|going to|imma|will)`;
+
+// A group scores `base` + 0.2 per match (default base 0.5, so one match = 0.7: review). Severe threats
+// use a higher base so one match clears the high threshold and the policy withholds the content.
+const MOCK_LEXICON: { key: keyof ProviderScores; base?: number; patterns: RegExp[] }[] = [
+  { key: "harassment", patterns: [new RegExp(String.raw`\b(idiot|loser|stupid|worthless|pathetic|ugly|freak|nobody likes ${YOU}|everyone hates ${YOU}|shut up)\b`, "i")] },
+  // Severe: death or weapon threats against the reader.
+  { key: "harassment/threatening", base: 0.85, patterns: [
+    new RegExp(String.raw`\b${INTENT} (?:\w+ )?(?:kill|murder|stab|shoot|end) ${YOU}\b`, "i"),
+    new RegExp(String.raw`\b(?:kill|murder|stab|shoot) ${YOU}\b`, "i"),
+  ] },
+  // Other threats of harm ("hit you up" means "contact you" and is excluded).
+  { key: "harassment/threatening", patterns: [
+    new RegExp(String.raw`\b${INTENT} (?:\w+ )?(?:hurt|beat|hit|slap|kick|punch|smash) ${YOU}\b(?! up\b)`, "i"),
+    new RegExp(String.raw`\b(?:watch ${YOU}r back|${YOU}(?: ?(?:'|’)?ll| will) regret|beat ${YOU} up)\b`, "i"),
+  ] },
   { key: "hate", patterns: [/\b(people like you|your (caste|religion|kind)|go back to (your|where))\b/i] },
   { key: "sexual", patterns: [/\b(send (me )?nudes|sexy pics|hook up with me)\b/i] },
   { key: "self-harm/intent", patterns: [/\b(kill myself|want to die|end my life)\b/i] },
-  { key: "violence", patterns: [/\b(stab|punch|smash) (you|him|her|them)\b/i] },
+  { key: "violence", patterns: [new RegExp(String.raw`\b(?:stab|punch|smash|hit|slap|kick) (?:${YOU}|him|her|them)\b(?! up\b)`, "i")] },
 ];
 
 export class MockModerationProvider implements ModerationProvider {
@@ -102,9 +118,9 @@ export class MockModerationProvider implements ModerationProvider {
 
   async classify(text: string): Promise<ProviderResult> {
     const scores: ProviderScores = {};
-    for (const { key, patterns } of MOCK_LEXICON) {
+    for (const { key, base = 0.5, patterns } of MOCK_LEXICON) {
       const hits = patterns.reduce((n, re) => n + (text.match(new RegExp(re.source, "gi"))?.length ?? 0), 0);
-      scores[key] = Math.min(0.97, hits ? 0.5 + 0.2 * hits : 0.01);
+      scores[key] = Math.max(scores[key] ?? 0, Math.min(0.97, hits ? base + 0.2 * hits : 0.01));
     }
     if ((scores["harassment/threatening"] ?? 0) > 0.4) scores.harassment = Math.max(scores.harassment ?? 0, scores["harassment/threatening"]!);
     const flagged = Object.values(scores).some((v) => (v ?? 0) >= 0.5);

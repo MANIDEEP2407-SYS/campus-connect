@@ -113,6 +113,20 @@ describe("Moderation providers", () => {
     expect((await m.classify("See you at the hackathon!")).flagged).toBe(false);
   });
 
+  it("mock: severe threats are withheld, other threats reviewed, chat spellings included", async () => {
+    const m = new MockModerationProvider();
+    const risk = async (t: string) => evaluate((await m.classify(t)).scores, t, { providerLabel: "mock" }).risk;
+    for (const t of ["i will kill u", "I will kill you", "ill kill u", "gonna kill ya", "I'm going to stab you", "kill u"]) {
+      expect(await risk(t), t).toBe("critical");
+    }
+    for (const t of ["I will hit u", "i'll slap you", "imma beat u", "watch ur back"]) {
+      expect(await risk(t), t).not.toBe("low");
+    }
+    for (const t of ["I'll hit you up after class", "this bug will kill us", "u killed it at the fest!", "Will you join us?"]) {
+      expect(await risk(t), t).toBe("low");
+    }
+  });
+
   it("selects providers from configuration and fails closed when unconfigured", async () => {
     expect(getModerationProvider({ MODERATION_PROVIDER: "mock" }).isMock).toBe(true);
     expect(getModerationProvider({ MODERATION_PROVIDER: "openai", OPENAI_API_KEY: "sk" })).toBeInstanceOf(OpenAIModerationProvider);
