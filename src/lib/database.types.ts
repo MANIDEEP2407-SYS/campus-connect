@@ -787,17 +787,23 @@ isOneToOne: false
                   ]
                 },"posts": {
                   Row: {
-                    "author_id": string,"body": string,"club_id": string | null,"created_at": string,"event_id": string | null,"id": string,"image_path": string | null,"is_announcement": boolean,"shield_state": string,"updated_at": string
+                    "audience": Database["public"]['Enums']["post_audience"],"audience_club_id": string | null,"audience_department": string | null,"audience_tags": (string)[],"author_id": string,"body": string,"club_id": string | null,"created_at": string,"event_id": string | null,"id": string,"image_path": string | null,"is_announcement": boolean,"shield_state": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id": string,"body": string,"club_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"image_path"?: string | null,"is_announcement"?: boolean,"shield_state"?: string,"updated_at"?: string
+                    "audience"?: Database["public"]['Enums']["post_audience"],"audience_club_id"?: string | null,"audience_department"?: string | null,"audience_tags"?: (string)[],"author_id": string,"body": string,"club_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"image_path"?: string | null,"is_announcement"?: boolean,"shield_state"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "author_id"?: string,"body"?: string,"club_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"image_path"?: string | null,"is_announcement"?: boolean,"shield_state"?: string,"updated_at"?: string
+                    "audience"?: Database["public"]['Enums']["post_audience"],"audience_club_id"?: string | null,"audience_department"?: string | null,"audience_tags"?: (string)[],"author_id"?: string,"body"?: string,"club_id"?: string | null,"created_at"?: string,"event_id"?: string | null,"id"?: string,"image_path"?: string | null,"is_announcement"?: boolean,"shield_state"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "posts_audience_club_id_fkey"
+      columns: ["audience_club_id"]
+isOneToOne: false
+      referencedRelation: "clubs"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "posts_author_id_fkey"
       columns: ["author_id"]
 isOneToOne: false
@@ -1355,11 +1361,26 @@ isOneToOne: false
 "join_public_server":
 { Args: { "sid": string }; Returns: undefined
                            },
+"lower_tags":
+{ Args: { "tags": (string)[] }; Returns: (string)[]
+                           },
 "mod_resolve_report":
 { Args: { "p_id": string,"p_note"?: string,"p_remove_content"?: boolean,"p_status": string }; Returns: undefined
                            },
 "moderate_delete_message":
 { Args: { "mid": string }; Returns: undefined
+                           },
+"my_club_ids":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
+                           },
+"my_department":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"my_followee_ids":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
+                           },
+"my_interest_tags":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
                            },
 "notify":
 { Args: { "p_body"?: string,"p_link"?: string,"p_title": string,"p_type": string,"p_user": string }; Returns: undefined
@@ -1471,7 +1492,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"incident_reviewer"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","incident_category": "harassment"|"sexual_harassment"|"verbal_abuse"|"discrimination"|"threat_or_violence"|"unprofessional_conduct"|"academic_misconduct"|"other"|"plagiarism"|"idea_theft","incident_direction": "about_staff"|"about_student"|"about_peer","incident_status": "submitted"|"under_review"|"action_taken"|"unsubstantiated"|"false_report"|"withdrawn","membership_policy": "open"|"approval","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
+            "affiliation": "ug_student"|"pg_student"|"phd_scholar"|"faculty"|"staff","app_role": "platform_admin"|"incident_reviewer"|"moderator"|"faculty","application_status": "pending"|"shortlisted"|"accepted"|"rejected"|"withdrawn","club_member_role": "member"|"coordinator","incident_category": "harassment"|"sexual_harassment"|"verbal_abuse"|"discrimination"|"threat_or_violence"|"unprofessional_conduct"|"academic_misconduct"|"other"|"plagiarism"|"idea_theft","incident_direction": "about_staff"|"about_student"|"about_peer","incident_status": "submitted"|"under_review"|"action_taken"|"unsubstantiated"|"false_report"|"withdrawn","membership_policy": "open"|"approval","post_audience": "campus"|"followers"|"club"|"department"|"interests","profile_visibility": "campus"|"connections"|"hidden","project_kind": "research"|"consultancy","project_status": "open"|"closed"|"completed","registration_status": "registered"|"cancelled","request_status": "pending"|"approved"|"rejected","server_role": "owner"|"moderator"|"member","server_visibility": "public"|"private","shield_case_status": "open"|"in_review"|"escalated"|"resolved"|"dismissed","shield_category": "targeted_harassment"|"repeated_bullying"|"threats_intimidation"|"hate_discrimination"|"sexual_harassment"|"doxxing"|"other_harmful"|"none","shield_content": "post"|"comment"|"message"|"direct_message","shield_decision": "no_action"|"dismissed_false_positive"|"warning"|"edit_requested"|"removed"|"restricted"|"escalated","shield_risk": "low"|"review"|"high"|"critical"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1587,7 +1608,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "incident_reviewer", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"incident_category": ["harassment", "sexual_harassment", "verbal_abuse", "discrimination", "threat_or_violence", "unprofessional_conduct", "academic_misconduct", "other", "plagiarism", "idea_theft"],"incident_direction": ["about_staff", "about_student", "about_peer"],"incident_status": ["submitted", "under_review", "action_taken", "unsubstantiated", "false_report", "withdrawn"],"membership_policy": ["open", "approval"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
+            "affiliation": ["ug_student", "pg_student", "phd_scholar", "faculty", "staff"],"app_role": ["platform_admin", "incident_reviewer", "moderator", "faculty"],"application_status": ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],"club_member_role": ["member", "coordinator"],"incident_category": ["harassment", "sexual_harassment", "verbal_abuse", "discrimination", "threat_or_violence", "unprofessional_conduct", "academic_misconduct", "other", "plagiarism", "idea_theft"],"incident_direction": ["about_staff", "about_student", "about_peer"],"incident_status": ["submitted", "under_review", "action_taken", "unsubstantiated", "false_report", "withdrawn"],"membership_policy": ["open", "approval"],"post_audience": ["campus", "followers", "club", "department", "interests"],"profile_visibility": ["campus", "connections", "hidden"],"project_kind": ["research", "consultancy"],"project_status": ["open", "closed", "completed"],"registration_status": ["registered", "cancelled"],"request_status": ["pending", "approved", "rejected"],"server_role": ["owner", "moderator", "member"],"server_visibility": ["public", "private"],"shield_case_status": ["open", "in_review", "escalated", "resolved", "dismissed"],"shield_category": ["targeted_harassment", "repeated_bullying", "threats_intimidation", "hate_discrimination", "sexual_harassment", "doxxing", "other_harmful", "none"],"shield_content": ["post", "comment", "message", "direct_message"],"shield_decision": ["no_action", "dismissed_false_positive", "warning", "edit_requested", "removed", "restricted", "escalated"],"shield_risk": ["low", "review", "high", "critical"]
           }
         }
 } as const

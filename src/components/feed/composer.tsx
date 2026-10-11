@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, useTransition } from "react";
-import { LoaderCircle, Megaphone } from "lucide-react";
+import { Eye, LoaderCircle, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,9 @@ import { UserAvatar } from "@/components/common/user-avatar";
 import { ImageUpload } from "@/components/common/image-upload";
 import { createPost } from "@/lib/actions/social";
 import { useDraftGuard } from "@/components/shield/draft-guard";
+import { TagInput } from "@/components/common/tag-input";
+import { AUDIENCE_META, POST_AUDIENCES, type PostAudience } from "@/lib/audience";
+import { INTEREST_SUGGESTIONS } from "@/lib/constants";
 import Link from "next/link";
 
 export function Composer({
@@ -16,6 +19,8 @@ export function Composer({
   name,
   avatar,
   clubs = [],
+  memberClubs = [],
+  hasDepartment = false,
   fixedClubId,
   placeholder = "Share a project, achievement or question with campus…",
 }: {
@@ -23,6 +28,9 @@ export function Composer({
   name: string;
   avatar: string | null;
   clubs?: { id: string; name: string }[];
+  /** Clubs the author is an approved member of (for club-only audiences). */
+  memberClubs?: { id: string; name: string }[];
+  hasDepartment?: boolean;
   fixedClubId?: string;
   placeholder?: string;
 }) {
@@ -30,18 +38,28 @@ export function Composer({
   const [image, setImage] = useState<string | null>(null);
   const [clubId, setClubId] = useState<string>(fixedClubId ?? "");
   const [uploadKey, setUploadKey] = useState(0);
+  const [audience, setAudience] = useState<PostAudience>("campus");
+  const [audienceClubId, setAudienceClubId] = useState(fixedClubId ?? memberClubs[0]?.id ?? "");
+  const [audienceTags, setAudienceTags] = useState<string[]>([]);
+  const audiences = POST_AUDIENCES.filter((a) => (a !== "club" || memberClubs.length > 0 || fixedClubId) && (a !== "department" || hasDepartment));
+  const audienceIncomplete = (audience === "club" && !audienceClubId) || (audience === "interests" && audienceTags.length === 0);
   const [pending, start] = useTransition();
   const { guard, checking, dialog } = useDraftGuard();
   const composerId = useId();
 
   const publish = () =>
     start(async () => {
-      const res = await createPost({ body, image_path: image, club_id: clubId || null, is_announcement: Boolean(clubId) });
+      const res = await createPost({
+        body, image_path: image, club_id: clubId || null, is_announcement: Boolean(clubId),
+        audience, audience_club_id: audience === "club" ? audienceClubId : null, audience_tags: audience === "interests" ? audienceTags : [],
+      });
       if (!res.ok) return void toast.error(res.error);
       toast.success(clubId ? "Announcement published" : "Posted");
       setBody("");
       setImage(null);
       setUploadKey((k) => k + 1);
+      setAudience("campus");
+      setAudienceTags([]);
     });
   const submit = () => guard(body, publish);
 
@@ -78,11 +96,32 @@ export function Composer({
                 </select>
               </label>
             )}
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground" title={AUDIENCE_META[audience].hint}>
+              <Eye className="size-3.5" />
+              <span className="sr-only">Who can see this</span>
+              <select value={audience} onChange={(e) => setAudience(e.target.value as PostAudience)} className="h-7 rounded-md border bg-transparent px-1.5 text-xs [&>option]:bg-popover">
+                {audiences.map((a) => <option key={a} value={a}>{AUDIENCE_META[a].label}</option>)}
+              </select>
+            </label>
+            {audience === "club" && !fixedClubId && (
+              <label className="text-xs">
+                <span className="sr-only">Club</span>
+                <select value={audienceClubId} onChange={(e) => setAudienceClubId(e.target.value)} className="h-7 rounded-md border bg-transparent px-1.5 text-xs [&>option]:bg-popover">
+                  {memberClubs.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </label>
+            )}
             <span className="ml-auto text-xs text-muted-foreground tabular-nums">{body.length}/2000</span>
-            <Button onClick={submit} disabled={pending || checking || !body.trim()} size="sm" className="px-3">
+            <Button onClick={submit} disabled={pending || checking || !body.trim() || audienceIncomplete} size="sm" className="px-3">
               {(pending || checking) && <LoaderCircle className="animate-spin" />} {clubId ? "Announce" : "Post"}
             </Button>
           </div>
+          {audience === "interests" && (
+            <div className="space-y-1">
+              <TagInput value={audienceTags} onChange={setAudienceTags} suggestions={INTEREST_SUGGESTIONS} max={10} placeholder="Topics, e.g. Robotics — press Enter" />
+              <p className="text-[11px] text-muted-foreground">Only people with at least one of these interests on their profile will see this post.</p>
+            </div>
+          )}
           <p className="text-[11px] text-muted-foreground">
             Posts are checked by <Link href="/safety" className="text-primary hover:underline">CampusShield</Link>, an AI-assisted safety system — moderators, not the AI, make decisions.
           </p>

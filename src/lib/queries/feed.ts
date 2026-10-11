@@ -1,5 +1,6 @@
 import "server-only";
 import type { Viewer } from "@/lib/auth";
+import { audienceLabel } from "@/lib/audience";
 
 export type FeedTab = "all" | "following" | "announcements" | "saved";
 
@@ -17,11 +18,13 @@ export interface FeedPost {
   savedByMe: boolean;
   mine: boolean;
   shieldState: "visible" | "held" | "removed";
+  /** "Who can see this" label; null for posts visible to everyone. */
+  audienceLabel: string | null;
   comments: { id: string; body: string; createdAt: string; mine: boolean; canDelete: boolean; shieldState: "visible" | "held" | "removed"; author: { handle: string; full_name: string; avatar_url: string | null } | null }[];
 }
 
 const POST_SELECT =
-  "id, body, image_path, created_at, updated_at, is_announcement, author_id, shield_state, author:profiles!posts_author_id_fkey(id, handle, full_name, avatar_url, affiliation), club:clubs(name, slug, is_official, logo), post_likes(count)";
+  "id, body, image_path, created_at, updated_at, is_announcement, author_id, shield_state, author:profiles!posts_author_id_fkey(id, handle, full_name, avatar_url, affiliation), club:clubs!posts_club_fk(name, slug, is_official, logo), post_likes(count), audience, audience_department, audience_tags, audience_club:clubs!posts_audience_club_id_fkey(name)";
 
 export async function getFeed(v: Viewer, opts: { tab: FeedTab; before?: string; authorId?: string; clubId?: string; limit?: number }) {
   const limit = opts.limit ?? 20;
@@ -84,6 +87,7 @@ export async function getFeed(v: Viewer, opts: { tab: FeedTab; before?: string; 
     savedByMe: saved.has(p.id),
     mine: p.author_id === v.userId,
     shieldState: p.shield_state as FeedPost["shieldState"],
+    audienceLabel: audienceLabel({ audience: p.audience, clubName: p.audience_club?.name, department: p.audience_department, tags: p.audience_tags }),
     comments: (comments ?? [])
       .filter((c) => c.post_id === p.id && !hidden.includes(c.author_id))
       .map((c) => ({

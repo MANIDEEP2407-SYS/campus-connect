@@ -3,7 +3,7 @@
 // These use only the public anon key + demo sign-ins — exactly what a malicious client could do.
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Database } from "@/lib/database.types";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -134,6 +134,66 @@ describe.skipIf(!enabled)("authorization rules (RLS + RPC)", () => {
       ]);
       expect(student).toHaveLength(0);
       expect(Array.isArray(admin)).toBe(true);
+    });
+  });
+
+  describe("post audiences", () => {
+    const created: string[] = [];
+    type Audience = Database["public"]["Enums"]["post_audience"];
+    const post = async (c: Client, audience: Audience, extra: { audience_club_id?: string; audience_tags?: string[] } = {}) => {
+      const me = (await c.auth.getUser()).data.user!.id;
+      const { data, error } = await c.from("posts").insert({ author_id: me, body: `Audience test ${audience} ${Date.now()}`, audience, ...extra }).select("id").single();
+      if (error) throw new Error(error.message);
+      created.push(data.id);
+      return data.id;
+    };
+    const sees = async (c: Client, id: string) => ((await c.from("posts").select("id").eq("id", id)).data ?? []).length === 1;
+
+    afterAll(async () => {
+      if (created.length) await clients.aditi!.from("posts").delete().in("id", created);
+    });
+
+    it("followers-only posts are visible to followers only", async () => {
+      await clients.sneha!.from("follows").delete().eq("follower_id", ids.sneha!).eq("followee_id", ids.aditi!);
+      await clients.priya!.from("follows").upsert({ follower_id: ids.priya!, followee_id: ids.aditi! });
+      const id = await post(clients.aditi!, "followers");
+      expect(await sees(clients.priya!, id)).toBe(true);
+      expect(await sees(clients.sneha!, id)).toBe(false);
+      expect(await sees(clients.aditi!, id)).toBe(true);
+    });
+
+    it("department posts reach the author's department only", async () => {
+      const id = await post(clients.aditi!, "department");
+      const { data } = await clients.aditi!.from("posts").select("audience_department").eq("id", id).single();
+      expect(data!.audience_department).toBe("Computer Science & Engineering");
+      expect(await sees(clients.maintenance!, id)).toBe(true); // CSE
+      expect(await sees(clients.rahul!, id)).toBe(false); // Biomedical
+    });
+
+    it("interest posts reach people with a matching interest (case-insensitive)", async () => {
+      const id = await post(clients.aditi!, "interests", { audience_tags: ["robotics"] });
+      expect(await sees(clients.sneha!, id)).toBe(true); // interests include Robotics
+      expect(await sees(clients.fatima!, id)).toBe(false);
+    });
+
+    it("club posts reach approved members only, and only members can target a club", async () => {
+      const { data: m } = await clients.aditi!.from("club_members").select("club_id").eq("user_id", ids.aditi!).eq("status", "approved").limit(1).single();
+      const clubId = m!.club_id;
+      const id = await post(clients.aditi!, "club", { audience_club_id: clubId });
+      const { data: members } = await clients.aditi!.from("club_members").select("user_id").eq("club_id", clubId).eq("status", "approved");
+      const memberIds = new Set((members ?? []).map((r) => r.user_id));
+      const outsider = (["fatima", "vikram", "nikhil", "arjun", "rahul"] as const).find((h) => !memberIds.has(ids[h]!))!;
+      expect(await sees(clients[outsider]!, id)).toBe(false);
+      await expect(post(clients[outsider]!, "club", { audience_club_id: clubId })).rejects.toThrow(/member/i);
+    });
+
+    it("people outside the audience can't read, comment on or like the post", async () => {
+      const id = await post(clients.aditi!, "followers");
+      const s = clients.sneha!;
+      expect((await s.from("comments").insert({ post_id: id, author_id: ids.sneha!, body: "hi" })).error).not.toBeNull();
+      expect((await s.from("post_likes").insert({ post_id: id, user_id: ids.sneha! })).error).not.toBeNull();
+      await clients.aditi!.from("comments").insert({ post_id: id, author_id: ids.aditi!, body: "Private comment" });
+      expect((await s.from("comments").select("id").eq("post_id", id)).data).toHaveLength(0);
     });
   });
 

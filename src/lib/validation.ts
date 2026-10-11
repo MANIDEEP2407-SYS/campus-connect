@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { INCIDENT_CATEGORIES } from "@/lib/incidents";
+import { POST_AUDIENCES } from "@/lib/audience";
 
 // Shared by client forms (react-hook-form + zodResolver) and server actions (re-validation).
 
@@ -54,7 +55,12 @@ export const postSchema = z.object({
   image_path: z.string().max(300).nullable().optional(),
   club_id: z.uuid().nullable().optional(),
   is_announcement: z.boolean().optional(),
-});
+  audience: z.enum(POST_AUDIENCES).default("campus"),
+  audience_club_id: z.uuid().nullable().optional(),
+  audience_tags: tags(10).default([]),
+})
+  .refine((v) => v.audience !== "club" || v.audience_club_id, { message: "Choose a club", path: ["audience_club_id"] })
+  .refine((v) => v.audience !== "interests" || v.audience_tags.length > 0, { message: "Pick at least one topic", path: ["audience_tags"] });
 
 export const commentSchema = z.object({ post_id: z.uuid(), body: z.string().trim().min(1).max(1000) });
 

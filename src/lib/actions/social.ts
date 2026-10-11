@@ -41,6 +41,10 @@ export async function createPost(input: unknown) {
         image_path: data.image_path ?? null,
         club_id: data.club_id ?? null,
         is_announcement: Boolean(data.club_id && data.is_announcement),
+        // Department and tag normalisation happen in the posts_audience_guard trigger.
+        audience: data.audience,
+        audience_club_id: data.audience === "club" ? (data.audience_club_id ?? null) : null,
+        audience_tags: data.audience === "interests" ? data.audience_tags : [],
       })
       .select("id")
       .single();

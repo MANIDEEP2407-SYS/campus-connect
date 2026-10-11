@@ -28,10 +28,13 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
 
   const [feed, { data: myClubs }, { data: events }] = await Promise.all([
     getFeed(v, { tab, before }),
-    v.supabase.from("club_members").select("club:clubs(id, name)").eq("user_id", v.userId).eq("role", "coordinator").eq("status", "approved"),
+    v.supabase.from("club_members").select("role, club:clubs(id, name)").eq("user_id", v.userId).eq("status", "approved"),
     v.supabase.from("events").select("id, title, starts_at, venue, club:clubs(name)").gte("starts_at", new Date().toISOString()).eq("is_cancelled", false).order("starts_at").limit(4),
   ]);
-  const coordinatorClubs = (myClubs ?? []).map((m) => m.club).filter((c): c is { id: string; name: string } => Boolean(c));
+  const clubOf = (m: { club: { id: string; name: string } | null }) => m.club;
+  const isClub = (c: { id: string; name: string } | null): c is { id: string; name: string } => Boolean(c);
+  const memberClubs = (myClubs ?? []).map(clubOf).filter(isClub);
+  const coordinatorClubs = (myClubs ?? []).filter((m) => m.role === "coordinator").map(clubOf).filter(isClub);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -40,7 +43,7 @@ export default async function HomePage({ searchParams }: PageProps<"/home">) {
           <h1 className="text-2xl font-semibold">Good to see you, {v.profile.full_name.split(" ")[0]}</h1>
           <p className="text-sm text-muted-foreground">What&apos;s happening across campus.</p>
         </div>
-        <Composer userId={v.userId} name={v.profile.full_name} avatar={v.profile.avatar_url} clubs={coordinatorClubs} />
+        <Composer userId={v.userId} name={v.profile.full_name} avatar={v.profile.avatar_url} clubs={coordinatorClubs} memberClubs={memberClubs} hasDepartment={Boolean(v.profile.department)} />
         <nav aria-label="Feed filters" className="flex gap-1 overflow-x-auto rounded-lg border bg-card p-1">
           {TABS.map((t) => (
             <Link

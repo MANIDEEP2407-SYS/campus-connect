@@ -21,7 +21,7 @@ const cases: [string, z.ZodType, unknown][] = [
   ["project", projectSchema, { kind: "research", title: "A research project", abstract: "An abstract that is long enough to pass.", description: "", area: "Other", department: "", required_skills: [], commitment: "4 hrs/week", positions: "2", budget_note: "" }],
   ["application", applicationSchema, { project_id: UUID, statement: "I would like to join because I have relevant experience.", relevant_skills: [], availability: "" }],
   ["incident", incidentSchema, { category: "other", subject_kind: "staff", subject_name: "A teacher", department: "Mathematics", title: "Incident in class", description: "A description of what happened that is long enough.", occurred_on: day, location: "", context: "", witnesses: "", declaration: true }],
-  ["post", postSchema, { body: "Hello", image_path: null, club_id: null, is_announcement: false }],
+  ["post", postSchema, { body: "Hello", image_path: null, club_id: null, is_announcement: false, audience: "campus", audience_club_id: null, audience_tags: [] }],
 ];
 
 describe("form schemas survive the client → server round trip", () => {

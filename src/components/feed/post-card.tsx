@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
-import { BadgeCheck, Bookmark, Ellipsis, Flag, Heart, LoaderCircle, Megaphone, MessageSquare, Pencil, Send, Trash } from "lucide-react";
+import { BadgeCheck, Bookmark, Ellipsis, Flag, Heart, LoaderCircle, Lock, Megaphone, MessageSquare, Pencil, Send, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -88,6 +88,11 @@ export function PostCard({ post, canModerate }: { post: FeedPost; canModerate: b
             {post.club && post.isAnnouncement && post.author ? <>by {authorName} · </> : post.author ? <>{AFFILIATION_LABELS[post.author.affiliation as keyof typeof AFFILIATION_LABELS]} · </> : null}
             <time dateTime={post.createdAt} suppressHydrationWarning>{ago(post.createdAt)}</time>
             {post.edited && " · edited"}
+            {post.audienceLabel && (
+              <span className="ml-1.5 inline-flex items-center gap-1 align-middle" title="Who can see this post">
+                · <Lock className="size-3" aria-hidden /> <span className="sr-only">Visible to </span>{post.audienceLabel}
+              </span>
+            )}
           </p>
         </div>
         <DropdownMenu>
