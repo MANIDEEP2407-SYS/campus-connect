@@ -56,6 +56,12 @@ export function IncidentForm({ userId, affiliation, defaultDepartment }: { userI
 
   return (
     <form noValidate onSubmit={form.handleSubmit(submit)} className="space-y-6">
+      {kinds.length === 1 && (
+        <p role="note" className="rounded-xl border bg-card p-4 text-sm">
+          <span className="font-semibold">Reporting a student.</span>{" "}
+          <span className="text-muted-foreground">Teachers and staff can report students for any incident, including taking your ideas or work to another teacher.</span>
+        </p>
+      )}
       {kinds.length > 1 && (
         <fieldset className="rounded-xl border bg-card p-5">
           <legend className="px-1 text-sm font-semibold">Who is this about?</legend>
